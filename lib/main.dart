@@ -1,72 +1,77 @@
+// import 'package:flutter/material.dart';
+// import 'package:ngoni_pay/common/utils/kstrings.dart';
+// import 'package:ngoni_pay/features/auth/login_screen.dart';
+// import 'package:ngoni_pay/features/dashboard/dashboard_screen.dart';
+
+// import 'features/auth/register_screen.dart';
+
+// void main() {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   runApp(const NgoniPayApp());
+// }
+
+// class NgoniPayApp extends StatelessWidget {
+//   const NgoniPayApp({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       title: AppText.kAppName,
+
+//       theme: ThemeData(
+//         useMaterial3: true,
+//         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6C63FF)),
+//         scaffoldBackgroundColor: const Color(0xFFF6F4FF),
+//         appBarTheme: const AppBarTheme(
+//           centerTitle: true,
+//           elevation: 0,
+//           backgroundColor: Colors.transparent,
+//           foregroundColor: Colors.black,
+//         ),
+//       ),
+
+//       // 🔐 Écran de départ
+//       initialRoute: '/register',
+
+//       routes: {
+//         '/login': (context) => const LoginScreen(),
+//         '/dashboard': (context) => const DashboardScreen(),
+//         '/register': (context) => const RegisterScreen(),
+//       },
+//     );
+//   }
+// }
 import 'package:flutter/material.dart';
+import 'package:ngoni_pay/app/app_router.dart';
+import 'package:ngoni_pay/common/utils/kstrings.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const NgoniPayApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  // This widget is the root of your application.
+class NgoniPayApp extends StatelessWidget {
+  const NgoniPayApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'NGONI PAY',
+      title: AppText.kAppName,
+
+      routerConfig: appRouter,
+
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'NGONI PAY'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-    
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
- 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-
-        title: Text(widget.title),
-      ),
-      body: Center(
-
-        child: Column(
-
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6C63FF)),
+        scaffoldBackgroundColor: const Color(0xFFF6F4FF),
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.black,
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }

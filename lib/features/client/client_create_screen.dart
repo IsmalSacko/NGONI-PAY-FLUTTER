@@ -4,8 +4,8 @@ import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
 import 'package:ngoni_pay/common/utils/widgets/back_button.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class ClientCreateScreen extends StatelessWidget {
+  const ClientCreateScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class LoginScreen extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: SizedBox(
-            height: size.height - MediaQuery.of(context).padding.top,
+            height: size.height,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -30,35 +30,22 @@ class LoginScreen extends StatelessWidget {
                       child: AppBackButton(),
                     ),
                   ),
-                // LOGO / TITLE
-                Column(
-                  children: const [
-                    Icon(
-                      Icons.account_balance_wallet_rounded,
-                      size: 64,
-                      color: Kolors.kPrimary,
-                    ),
-                    SizedBox(height: 12),
-                    Text(
-                      AppText.kAppName,
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
-                        color: Kolors.kDark,
-                      ),
-                    ),
-                    SizedBox(height: 6),
-                    Text(
-                      AppText.kLoginSubtitle,
-                      style: TextStyle(fontSize: 14, color: Kolors.kGray),
-                    ),
-                  ],
+                const Icon(
+                  Icons.person_outline,
+                  size: 64,
+                  color: Kolors.kPrimary,
                 ),
-
+                const SizedBox(height: 12),
+                const Text(
+                  AppText.kAddClient,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Kolors.kDark,
+                  ),
+                ),
                 const SizedBox(height: 32),
 
-                // CARD
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -74,7 +61,16 @@ class LoginScreen extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      // EMAIL
+                      TextField(
+                        decoration: InputDecoration(
+                          labelText: AppText.kFullName,
+                          prefixIcon: const Icon(Icons.person_outline),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                       TextField(
                         keyboardType: TextInputType.phone,
                         decoration: InputDecoration(
@@ -85,61 +81,35 @@ class LoginScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 16),
-
-                      // PASSWORD
                       TextField(
-                        obscureText: true,
                         decoration: InputDecoration(
-                          labelText: AppText.kPassword,
-                          prefixIcon: const Icon(Icons.lock_outline),
+                          labelText: AppText.kEmail,
+                          prefixIcon: const Icon(Icons.email_outlined),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 24),
-
-                      // BUTTON
                       SizedBox(
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF6C63FF),
+                            backgroundColor: Kolors.kPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            elevation: 0,
                           ),
-                          child: Text(
-                            AppText.kLoginButton,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Kolors.kWhite,
-                            ),
+                          child: const Text(
+                            AppText.kSubmit,
+                            style: TextStyle(color: Kolors.kWhite),
                           ),
                         ),
                       ),
                     ],
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // FOOTER
-                TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    AppText.kForgotPassword,
-                    style: TextStyle(
-                      color: Kolors.kPrimary,
-                      decoration: TextDecoration.underline,
-                    ),
                   ),
                 ),
               ],
