@@ -1,16 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
 import 'package:ngoni_pay/common/utils/widgets/back_button.dart';
+import 'package:ngoni_pay/common/utils/widgets/reusable_text.dart';
+import 'package:ngoni_pay/features/auth/auth_controller.dart';
+import 'package:provider/provider.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-
+   final auth = context.watch<AuthController>();
     return Scaffold(
       backgroundColor: const Color(0xFFF6F4FF),
       body: SafeArea(
@@ -74,8 +93,9 @@ class LoginScreen extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      // EMAIL
+                      // PHONE
                       TextField(
+                        controller: _phoneController,
                         keyboardType: TextInputType.phone,
                         decoration: InputDecoration(
                           labelText: AppText.kTelephone,
@@ -90,6 +110,7 @@ class LoginScreen extends StatelessWidget {
 
                       // PASSWORD
                       TextField(
+                        controller: _passwordController,
                         obscureText: true,
                         decoration: InputDecoration(
                           labelText: AppText.kPassword,
@@ -100,29 +121,56 @@ class LoginScreen extends StatelessWidget {
                         ),
                       ),
 
-                      const SizedBox(height: 24),
-
+                      const SizedBox(height: 16),
+                      // ERROR
+                      if (auth.error != null)
+                        ReusableText(
+                          text: auth.error!,
+                          style: const TextStyle(
+                            color: Kolors.kRed,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      const SizedBox(height: 16),
                       // BUTTON
                       SizedBox(
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: auth.isLoading 
+                              ? null
+                              : () async {
+                                  final success = await auth.login(
+                                    _phoneController.text,
+                                    _passwordController.text,
+                                  );
+
+                                  if (!mounted) return;
+                                  if (success) {
+                                    context.go('/home');
+                                  }
+                                },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF6C63FF),
+                            backgroundColor: Kolors.kPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                             elevation: 0,
                           ),
-                          child: Text(
-                            AppText.kLoginButton,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Kolors.kWhite,
-                            ),
-                          ),
+                          child: 
+                          ReusableText
+                          (text: AppText.kLoginButton,
+                          style: appStyle(16, Kolors.kOffWhite, FontWeight.w600)
+                          )
+                          // Text(
+                          //   AppText.kLoginButton,
+                          //   style: TextStyle(
+                          //     fontSize: 16,
+                          //     fontWeight: FontWeight.w600,
+                          //     color: Kolors.kWhite,
+                          //   ),
+                          // ),
                         ),
                       ),
                     ],

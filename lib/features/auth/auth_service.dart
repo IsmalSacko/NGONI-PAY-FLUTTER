@@ -1,18 +1,37 @@
+import 'package:ngoni_pay/core/services/api_service.dart';
+import 'package:ngoni_pay/core/storage/secure_storage.dart';
+
 class AuthService {
-  // Authentication service implementation
-  
-  Future<bool> login(String email, String password) async {
-    // TODO: Implement login logic
-    return false;
+ static Future<void> login({
+    required String phone,
+    required String password,
+  }) async {
+    try {
+      final response = await ApiService.post('/auth/login',
+        data: {
+          'phone': phone,
+          'password': password,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final token = response.data['token'];
+        await SecureStorage.saveToken(token);
+      } else {
+        throw Exception('Failed to login');
+      }
+    } catch (e) {
+      rethrow;
+    }
   }
 
-  Future<bool> logout() async {
-    // TODO: Implement logout logic
-    return false;
+  Future<void> logout() async {
+   await SecureStorage.clearToken();
   }
 
-  Future<bool> isLoggedIn() async {
-    // TODO: Implement check logged in logic
-    return false;
-  }
+ 
 }
+
+
+
+

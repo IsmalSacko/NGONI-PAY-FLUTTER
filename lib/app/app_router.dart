@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ngoni_pay/core/storage/secure_storage.dart';
 import 'package:ngoni_pay/features/businessUser/business_user_create_screen.dart';
 
 // Public
@@ -19,8 +20,25 @@ import 'package:ngoni_pay/features/subscription/subscription_create_screen.dart'
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
+  redirect: (context, state) async {
+    final token = await SecureStorage.getToken();
+    final isAuthRoute = state.uri.path.startsWith('/auth');
+
+    // pas connecté -> bloquer la zone connectée
+    if (token == null && 
+    !isAuthRoute && state.uri.path != '/'
+    ) {
+      return '/auth/login';
+    }
+    // déjà connecté -> pas besoin login/register
+    if (token != null && isAuthRoute) {
+      return '/home';
+    }
+    return null;
+  },
+
   routes: [
-    // 🌍 PUBLIC
+    //PUBLIC
     GoRoute(path: '/', builder: (context, state) => const WelcomeScreen()),
     GoRoute(
       path: '/auth/login',
@@ -31,7 +49,7 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const RegisterScreen(),
     ),
 
-    // 🔐 CONNECTED AREA
+    // CONNECTED AREA
     ShellRoute(
       builder: (context, state, child) {
         return AppShell(child: child);
@@ -73,3 +91,5 @@ final GoRouter appRouter = GoRouter(
     ),
   ],
 );
+  
+
