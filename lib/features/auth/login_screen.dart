@@ -29,9 +29,20 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-   final auth = context.watch<AuthController>();
+    final auth = context.watch<AuthController>();
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F4FF),
+      appBar: AppBar(
+        title: Text(
+          "Connexion",
+          style: appStyle(20, Kolors.kWhite, FontWeight.w700),
+        ),
+        leading: const Padding(
+          padding: EdgeInsets.only(left: 16.0),
+          child: AppBackButton(color: Kolors.kWhite),
+        ),
+        backgroundColor: Kolors.kPrimary,
+        elevation: 0,
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -40,15 +51,6 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Bouton retour
-                if (GoRouter.of(context).canPop())
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: AppBackButton(),
-                    ),
-                  ),
                 // LOGO / TITLE
                 Column(
                   children: const [
@@ -138,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
-                          onPressed: auth.isLoading 
+                          onPressed: auth.isLoading
                               ? null
                               : () async {
                                   final success = await auth.login(
@@ -148,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                   if (!mounted) return;
                                   if (success) {
-                                    context.go('/home');
+                                    context.go('/dashboard');
                                   }
                                 },
                           style: ElevatedButton.styleFrom(
@@ -158,11 +160,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             elevation: 0,
                           ),
-                          child: 
-                          ReusableText
-                          (text: AppText.kLoginButton,
-                          style: appStyle(16, Kolors.kOffWhite, FontWeight.w600)
-                          )
+                          child: ReusableText(
+                            text: AppText.kLoginButton,
+                            style: appStyle(
+                              16,
+                              Kolors.kOffWhite,
+                              FontWeight.w600,
+                            ),
+                          ),
                           // Text(
                           //   AppText.kLoginButton,
                           //   style: TextStyle(

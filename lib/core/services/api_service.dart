@@ -12,20 +12,9 @@ class ApiService {
     ),
   );
 
-/// Requête GET
-  static Future<Response> get(
-    String endpoint, {
-    Map<String, dynamic>? queryParameters,
-    bool auth = false,
-  }) async {
-    if (auth) {
-      final token = await SecureStorage.getToken();
-      _dio.options.headers['Authorization'] = 'Bearer $token';
-    }
 
-    return _dio.get(endpoint, queryParameters: queryParameters);
-  }
-/// Requête POST
+
+// Requête POST
   static Future<Response> post(
     String endpoint, {
     Map<String, dynamic>? data,
@@ -37,5 +26,14 @@ class ApiService {
     }
 
     return _dio.post(endpoint, data: data);
+  }
+
+  // Requête GET
+  static Future<Response> get(String endpoint, {bool auth = false, Map<String, dynamic>? queryParameters}) async {
+    if (auth) {
+      final token = await SecureStorage.getToken();
+      _dio.options.headers['Authorization'] = 'Bearer $token';
+    }
+    return _dio.get(endpoint, queryParameters: queryParameters);
   }
 }

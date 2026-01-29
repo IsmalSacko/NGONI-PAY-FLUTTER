@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppShell extends StatelessWidget {
   final Widget child;
@@ -9,11 +10,12 @@ class AppShell extends StatelessWidget {
 
   int _currentIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.toString();
-
-    if (location.startsWith('/home')) return 0;
+    if (location.startsWith('/business/picker')) return 3;
+    if (location.startsWith('/payments')) return 2; // ✅ ICI
+    if (location.startsWith('/business/picker')) return 2;
     if (location.startsWith('/business')) return 1;
-    if (location.startsWith('/payment')) return 2;
-    if (location.startsWith('/profile')) return 3;
+    if (location.startsWith('/me')) return 4;
+    if (location.startsWith('/home')) return 0; 
 
     return 0;
   }
@@ -23,7 +25,7 @@ class AppShell extends StatelessWidget {
     return Scaffold(
       body: child,
 
-      bottomNavigationBar: BottomNavigationBar(
+     bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex(context),
         selectedItemColor: Kolors.kPrimary,
         unselectedItemColor: Colors.grey,
@@ -37,9 +39,23 @@ class AppShell extends StatelessWidget {
               context.go('/business/create');
               break;
             case 2:
-              context.go('/payment/create');
+              () async {
+                final prefs = await SharedPreferences.getInstance();
+                final lastBusinessId = prefs.getInt('last_business_id');
+
+                if (!context.mounted) return;
+
+                context.go(
+                  lastBusinessId != null
+                      ? '/payments/create/$lastBusinessId'
+                      : '/business/picker',
+                );
+              }();
               break;
             case 3:
+              context.go('/business/picker');
+              break;
+            case 4:
               context.go('/me');
               break;
           }
@@ -53,9 +69,14 @@ class AppShell extends StatelessWidget {
             icon: Icon(Icons.storefront_outlined),
             label: 'Business',
           ),
+          // Service actif 
+           BottomNavigationBarItem(
+            icon: Icon(Icons.check_box),
+            label: 'Service Actif',
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.payments_outlined),
-            label: 'Paiements',
+            label: 'Encaisser',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
@@ -63,6 +84,7 @@ class AppShell extends StatelessWidget {
           ),
         ],
       ),
+
     );
   }
 }

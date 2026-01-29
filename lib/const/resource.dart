@@ -44,3 +44,4 @@ class R {
   /// ![preview](file:///Volumes/Transfer/Projects/fashion/assets/images/wishlist.png)
   static const String ASSETS_IMAGES_WISHLIST_PNG = 'assets/images/enceinte.png';
 }
+// 

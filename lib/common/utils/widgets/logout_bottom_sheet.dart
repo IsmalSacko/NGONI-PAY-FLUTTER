@@ -1,4 +1,6 @@
+import 'package:go_router/go_router.dart';
 import 'package:ngoni_pay/const/constants.dart';
+import 'package:ngoni_pay/core/storage/secure_storage.dart';
 
 import '../../../common/utils/kcolors.dart';
 import '../../../common/utils/kstrings.dart';
@@ -48,18 +50,27 @@ Future<dynamic> logoutBottomSheet(BuildContext context) {
                     radius: 16,
                     btnWidth: ScreenUtil().screenWidth / 2.2,
                   ),
-                  /*  GradientBtn(
-                    text: "Yes, Logout",
-                    onTap: () {
-                      Storage().removeKey('accessToken');
-                      context.read<TabIndexNotifier>().tabIndex = 0;
-                      context.go("/home");
-                      context.pop();
+                   GradientBtn(
+                    text: AppText.kLogout,
+                    onTap: () async {
+                      // Fermer la bottom sheet d'abord
+                      Navigator.of(context).pop();
+                      
+                      // Supprimer le token
+                      await SecureStorage.clearToken();
+                      
+                      // Attendre un peu pour que le contexte soit stable
+                      await Future.delayed(const Duration(milliseconds: 100));
+                      
+                      // Rediriger vers login
+                      if (context.mounted) {
+                        GoRouter.of(context).go('/auth/login');
+                      }
                     },
                     btnHieght: 35.h,
                     radius: 16,
                     btnWidth: ScreenUtil().screenWidth / 2.2,
-                  ),*/
+                  ),
                 ],
               ),
             ),

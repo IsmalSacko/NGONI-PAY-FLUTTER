@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
+import 'package:ngoni_pay/common/utils/widgets/app_appbar.dart';
+import 'package:ngoni_pay/core/storage/secure_storage.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -44,8 +46,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F4FF),
+      //backgroundColor: const Color(0xFFF6F4FF),
+        appBar: AppAppBar(
+        title: 'Bienvenue',     
+        
+      ),
+      //backgroundColor: const Color(0xFFF6F4FF),
       body: SafeArea(
+        
         child: FadeTransition(
           opacity: _fade,
           child: SlideTransition(
@@ -97,47 +105,91 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
                   const SizedBox(height: 48),
 
-                  // 🚀 CTA
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        context.go('/auth/register');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Kolors.kPrimary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        elevation: 4,
-                      ),
-                      child: const Text(
-                        "Commencer",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
+                  FutureBuilder<bool>(
+                    future: isAuthenticated(),
+                    builder: (context, snapshot) {
+                      // En attente → on n’affiche rien (évite le flicker)
+                      if (!snapshot.hasData) {
+                        return const SizedBox.shrink();
+                      }
 
-                  const SizedBox(height: 16),
+                      final isAuth = snapshot.data!;
 
-                  // 🔐 LOGIN LINK
-                  TextButton(
-                    onPressed: () {
-                      context.go('/auth/login');
+                      //  UTILISATEUR DÉJÀ CONNECTÉ
+                      if (isAuth) {
+                        return SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              context.go('/dashboard');
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Kolors.kPrimary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              elevation: 4,
+                            ),
+                            child: const Text(
+                              "Aller au tableau de bord",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+
+                      // ❌ UTILISATEUR NON CONNECTÉ
+                      return Column(
+                        children: [
+                          SizedBox(
+                            width: double.infinity,
+                            height: 52,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                context.go('/auth/register');
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Kolors.kPrimary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                elevation: 4,
+                              ),
+                              child: const Text(
+                                "Commencer",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          TextButton(
+                            onPressed: () {
+                              context.go('/auth/login');
+                            },
+                            child: const Text(
+                              "J’ai déjà un compte",
+                              style: TextStyle(
+                                color: Kolors.kPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
                     },
-                    child: const Text(
-                      "J’ai déjà un compte",
-                      style: TextStyle(
-                        color: Kolors.kPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
                   ),
+
                 ],
               ),
             ),
@@ -146,4 +198,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       ),
     );
   }
+}
+
+
+Future<bool> isAuthenticated() async {
+  final token = await SecureStorage.getToken();
+  return token != null && token.isNotEmpty;
 }

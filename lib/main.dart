@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:ngoni_pay/features/businesses/business_controller.dart';
+import 'package:ngoni_pay/features/payment/controller/payment_controller.dart';
+import 'package:ngoni_pay/features/payment/controller/payment_list_controller.dart';
+import 'package:ngoni_pay/features/user/profile_controller.dart';
 import 'package:provider/provider.dart';
 
 import 'package:ngoni_pay/app/app_router.dart';
@@ -17,7 +21,15 @@ class NgoniPayApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => AuthController())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => PaymentController()),
+        ChangeNotifierProvider(create: (_) => AuthController()),
+        ChangeNotifierProvider(create: (_) => ProfileController()),
+        ChangeNotifierProvider(create: (_) => BusinessController()),
+        ChangeNotifierProvider(create: (_) => PaymentListController()),
+
+      ], 
+      
       child: ScreenUtilInit(
         designSize: const Size(375, 812),
         minTextAdapt: true,

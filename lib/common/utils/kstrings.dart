@@ -82,6 +82,7 @@ class AppText {
   // 💳 PAIEMENTS
   // =========================
   static const String kPayments = 'Paiements';
+  static const String kPaymentAppBarTitle = 'Paiements';
   static const String kNewPayment = 'Nouveau paiement';
   static const String kReference = 'Référence';
   static const String kAmount = 'Montant';
@@ -126,7 +127,8 @@ class AppText {
   // =========================
   // 👤 PROFIL
   // =========================
-  static const String kProfile = 'Profil';
+  static const String kProfile = 'Mon profil';
+  static const String kPkAppName = 'Nom et prénom';
   static const String kEditProfile = 'Modifier le profil';
   static const String kPhone = 'Téléphone';
   static const String kSave = 'Enregistrer';
@@ -153,6 +155,8 @@ class AppText {
   // =========================
   // 📱 CLIENTS
   static const String kClients = 'Clients';
+  static const String kClientName = 'Nom du client';
+  static const String kClientPhone = 'Téléphone du client';
   static const String kAddClient = 'Ajouter un client';
 
   // =========================
@@ -173,6 +177,8 @@ class AppText {
   // Businesses
   static const String kCreateBusiness = 'Créer une entreprise';
   static const String kOwnerId = 'Propriétaire (ID)';
+  static const String kOwner = 'Propriétaire';
+  static const String kBusinesses = 'Entreprises';
   static const String kBusinessName = 'Nom de l\'entreprise';
   static const String kBusinessType = 'Type d\'entreprise';
   static const String kBusinessAddress = 'Adresse de l\'entreprise';

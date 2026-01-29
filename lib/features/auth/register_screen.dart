@@ -1,23 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
 import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
 import 'package:ngoni_pay/common/utils/widgets/back_button.dart';
+import 'package:ngoni_pay/features/auth/auth_controller.dart';
 
-class RegisterScreen extends StatelessWidget {
+enum UserRole { owner, staff }
+
+class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  final nameController = TextEditingController();
+  final phoneController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
+  UserRole selectedRole = UserRole.owner; // UI only (backend default)
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    phoneController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final auth = context.watch<AuthController>();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F4FF),
-      // appBar: AppBar(
-      //   title: const Text('Inscription'),
-      //   titleSpacing: 16,
-      //   backgroundColor: Kolors.kSuccess
-      // ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -26,7 +50,7 @@ class RegisterScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Bouton retour
+                // Back
                 Align(
                   alignment: Alignment.topLeft,
                   child: Padding(
@@ -34,7 +58,8 @@ class RegisterScreen extends StatelessWidget {
                     child: AppBackButton(),
                   ),
                 ),
-                // LOGO / TITLE
+
+                // HEADER
                 Column(
                   children: const [
                     Icon(
@@ -78,8 +103,9 @@ class RegisterScreen extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      // FULL NAME
+                      // NAME
                       TextField(
+                        controller: nameController,
                         decoration: InputDecoration(
                           labelText: AppText.kFullName,
                           prefixIcon: const Icon(Icons.person_outline),
@@ -88,11 +114,11 @@ class RegisterScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 16),
 
                       // PHONE
                       TextField(
+                        controller: phoneController,
                         keyboardType: TextInputType.phone,
                         decoration: InputDecoration(
                           labelText: AppText.kTelephone,
@@ -102,11 +128,11 @@ class RegisterScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 16),
 
                       // EMAIL
                       TextField(
+                        controller: emailController,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           labelText: AppText.kEmail,
@@ -116,11 +142,11 @@ class RegisterScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 16),
 
                       // PASSWORD
                       TextField(
+                        controller: passwordController,
                         obscureText: true,
                         decoration: InputDecoration(
                           labelText: AppText.kPassword,
@@ -130,11 +156,11 @@ class RegisterScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 16),
 
                       // CONFIRM PASSWORD
                       TextField(
+                        controller: confirmPasswordController,
                         obscureText: true,
                         decoration: InputDecoration(
                           labelText: AppText.kConfirmPassword,
@@ -144,12 +170,11 @@ class RegisterScreen extends StatelessWidget {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 16),
 
-                      const SizedBox(height: 24),
-
+                      // ROLE (UI ONLY)
                       DropdownButtonFormField<UserRole>(
-                        value:
-                            UserRole.owner, // valeur par défaut (comme Laravel)
+                        initialValue: selectedRole,
                         decoration: InputDecoration(
                           labelText: AppText.kSelectRole,
                           prefixIcon: const Icon(Icons.badge_outlined),
@@ -157,31 +182,65 @@ class RegisterScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        items: UserRole.values.map((role) {
-                          return DropdownMenuItem<UserRole>(
-                            value: role,
-                            child: Text(
-                              role == UserRole.owner
-                                  ? AppText.kRoleOwner
-                                  : AppText.kRoleStaff,
-                            ),
-                          );
-                        }).toList(),
+                        items: const [
+                          DropdownMenuItem(
+                            value: UserRole.owner,
+                            child: Text(AppText.kRoleOwner),
+                          ),
+                          DropdownMenuItem(
+                            value: UserRole.staff,
+                            child: Text(AppText.kRoleStaff),
+                          ),
+                        ],
                         onChanged: (value) {
-                          // PLUS TARD :
-                          // stocker le rôle sélectionné
+                          if (value != null) {
+                            setState(() => selectedRole = value);
+                          }
                         },
                       ),
-                      const SizedBox(height: 24),
 
-                      // BUTTON
+                      const SizedBox(height: 16),
+
+                      // ERROR
+                      if (auth.error != null)
+                        Text(
+                          auth.error!,
+                          style: const TextStyle(color: Colors.red),
+                        ),
+
+                      const SizedBox(height: 16),
+
+                      // SUBMIT
                       SizedBox(
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
-                          onPressed: () {
-                            GoRouter.of(context).go('/business/create');
-                          },
+                          onPressed: auth.isLoading
+                              ? null
+                              : () async {
+                                  if (passwordController.text !=
+                                      confirmPasswordController.text) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Les mots de passe ne correspondent pas',
+                                        ),
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  final success = await auth.register(
+                                    name: nameController.text,
+                                    phone: phoneController.text,
+                                    password: passwordController.text,
+                                    email: emailController.text,
+                                  );
+
+                                  if (success && mounted) {
+                                    context.go('/home');
+                                  }
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Kolors.kPrimary,
                             shape: RoundedRectangleBorder(
@@ -189,14 +248,18 @@ class RegisterScreen extends StatelessWidget {
                             ),
                             elevation: 0,
                           ),
-                          child: Text(
-                            AppText.kRegisterButton,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Kolors.kWhite,
-                            ),
-                          ),
+                          child: auth.isLoading
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                              : Text(
+                                  AppText.kRegisterButton,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Kolors.kWhite,
+                                  ),
+                                ),
                         ),
                       ),
                     ],
@@ -209,17 +272,15 @@ class RegisterScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       AppText.kAlreadyAccount,
-                      style: const TextStyle(color: Kolors.kGray),
+                      style: TextStyle(color: Kolors.kGray),
                     ),
                     TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: Text(
+                      onPressed: () => context.go('/auth/login'),
+                      child: const Text(
                         AppText.kLoginButton,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Kolors.kPrimary,
                           fontWeight: FontWeight.w600,
                         ),

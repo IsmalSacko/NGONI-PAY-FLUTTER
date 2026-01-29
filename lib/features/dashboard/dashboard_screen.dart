@@ -1,19 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
+import 'package:ngoni_pay/features/payment/controller/payment_list_controller.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final controller = context.watch<PaymentListController>();
+
+    Future.microtask(() async {
+      final prefs = await SharedPreferences.getInstance();
+      final businessId = prefs.getInt('last_business_id');
+
+      if (businessId != null && controller.payments.isEmpty) {
+        controller.loadPayments(businessId);
+      }
+    });
+
+    if (controller.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (controller.error != null) {
+      return Scaffold(
+        body: Center(
+          child: Text(
+            controller.error!,
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppText.kDashboardTitle),
+        elevation: 0,
+        backgroundColor: Kolors.kPrimary,
+        titleTextStyle: TextStyle(
+          fontSize: 24,
+          color: Kolors.kWhite,
+          fontWeight: FontWeight.bold,
+        ),
         actions: [
           IconButton(
             onPressed: () {},
             icon: const Icon(Icons.notifications_none),
+            color: Kolors.kWhite,
           ),
         ],
       ),
@@ -30,7 +66,7 @@ class DashboardScreen extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'NGNONI PAY',
+              AppText.kAppName,
               style: Theme.of(context).textTheme.headlineMedium,
             ),
 
@@ -40,44 +76,78 @@ class DashboardScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Kolors.kPrimary,
+                color: Kolors.kWhite,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
                     AppText.kBalance,
                     style: Theme.of(
                       context,
-                    ).textTheme.bodyMedium?.copyWith(color: Kolors.kWhite),
+                    ).textTheme.bodyMedium?.copyWith(color: Kolors.kDark),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '250 000 FCFA',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.headlineLarge?.copyWith(color: Kolors.kWhite),
+                    '${controller.totalAmountSuccess.toStringAsFixed(0)} FCFA',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: Kolors.kSuccess,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
             // ⚡ QUICK ACTIONS
             Row(
               children: [
+                // FOR INITIATING A NEW PAYMENT
                 _ActionButton(
-                  icon: Icons.send,
-                  label: AppText.kNewPayment,
-                  onTap: () {},
+                  icon: Icons.payments_outlined,
+                  label: 'Encaisser',
+                  onTap: () {
+                    context.go('/business/picker');
+                  },
                 ),
+                const SizedBox(width: 16),
+                // FOR VIEWING PAYMENTS LIST
+                _ActionButton(
+                  icon: Icons.payment,
+                  label: AppText.kPayments,
+                  onTap: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    final businessId = prefs.getInt('last_business_id');
+
+                    if (!context.mounted) return;
+
+                    if (businessId != null) {
+                      context.go('/payments/list/$businessId');
+                    } else {
+                      context.go('/business/picker');
+                    }
+                  },
+                ),
+                // FOR VIEWING TRANSACTIONS LIST
                 const SizedBox(width: 16),
                 _ActionButton(
                   icon: Icons.receipt_long,
                   label: AppText.kTransactions,
-                  onTap: () {},
+                  onTap: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    final businessId = prefs.getInt('last_business_id');
+
+                    if (!context.mounted) return;
+
+                    if (businessId != null) {
+                      context.go('/payments/list/$businessId');
+                    } else {
+                      context.go('/business/picker');
+                    }
+                  },
                 ),
               ],
             ),
@@ -93,7 +163,18 @@ class DashboardScreen extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    final businessId = prefs.getInt('last_business_id');
+
+                    if (!context.mounted) return;
+
+                    if (businessId != null) {
+                      context.go('/payments/list/$businessId');
+                    } else {
+                      context.go('/business/picker');
+                    }
+                  },
                   child: const Text(AppText.kViewAll),
                 ),
               ],
@@ -101,20 +182,41 @@ class DashboardScreen extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            _TransactionTile(
-              title: 'Paiement Orange Money',
-              amount: '-25 000 FCFA',
-              status: AppText.kStatusSuccess,
-            ),
-            _TransactionTile(
-              title: 'Paiement MTN MoMo',
-              amount: '-10 000 FCFA',
-              status: AppText.kStatusPending,
-            ),
-            _TransactionTile(
-              title: 'Recharge compte',
-              amount: '+50 000 FCFA',
-              status: AppText.kStatusSuccess,
+            Column(
+              children: controller.recentPayments.map((item) {
+                final isSuccess = item.payment.status == 'success';
+                final isPending = item.payment.status == 'pending';
+                final sign = isSuccess ? '+' : '-';
+
+                final currencySymbol = item.payment.currency == 'XOF'
+                    ? 'FCFA'
+                    : item.payment.currency;
+
+                return _TransactionTile(
+                  title:
+                      'Paiement ${item.payment.method == 'cash'
+                          ? 'Espèces'
+                          : item.payment.method == 'orange_money'
+                          ? 'Orange Money'
+                          : item.payment.method == 'moov_money'
+                          ? 'Moov Money'
+                          : item.payment.method == 'wave'
+                          ? 'Wave'
+                          : item.payment.method == 'paypal'
+                          ? 'PayPal'
+                          : item.payment.method == 'credit_card'
+                          ? 'Carte Bancaire'
+                          : 'Autre Méthode'}',
+                  amount:
+                      '$sign${item.payment.amount.toStringAsFixed(0)} $currencySymbol',
+
+                  status: isSuccess
+                      ? AppText.kStatusSuccess
+                      : isPending
+                      ? AppText.kStatusPending
+                      : AppText.kStatusFailed,
+                );
+              }).toList(),
             ),
           ],
         ),

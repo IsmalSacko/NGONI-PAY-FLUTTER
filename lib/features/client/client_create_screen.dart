@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
 import 'package:ngoni_pay/common/utils/widgets/back_button.dart';
@@ -16,25 +15,27 @@ class ClientCreateScreen extends StatelessWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: SizedBox(
-            height: size.height,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Bouton retour
-                if (GoRouter.of(context).canPop())
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: AppBackButton(),
-                    ),
-                  ),
-                const Icon(
-                  Icons.person_outline,
-                  size: 64,
-                  color: Kolors.kPrimary,
+          child: Column(
+            children: [
+              // Bouton retour en haut
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 16, bottom: 20),
+                  child: AppBackButton(),
                 ),
+              ),
+              // Contenu centré
+              SizedBox(
+                height: size.height - 100,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.person_outline,
+                      size: 64,
+                      color: Kolors.kPrimary,
+                    ),
                 const SizedBox(height: 12),
                 const Text(
                   AppText.kAddClient,
@@ -112,8 +113,10 @@ class ClientCreateScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-              ],
-            ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

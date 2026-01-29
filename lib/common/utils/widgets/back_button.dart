@@ -18,12 +18,15 @@ class AppBackButton extends StatelessWidget {
           () {
             if (GoRouter.of(context).canPop()) {
               GoRouter.of(context).pop();
+            } else {
+              // Si on ne peut pas pop, aller à l'accueil
+              GoRouter.of(context).go('/dashboard');
             }
           },
       child: Icon(
         AntDesign.leftcircle,
         color: color ?? Kolors.kPrimary,
-        size: size ?? 24,
+        size: size ?? 28,
       ),
     );
   }

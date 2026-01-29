@@ -32,4 +32,7 @@ class Kolors {
   static const Color kGold = Color(0xFFFFC107); // warning / highlight
   static const Color kRed = Color(0xFFE53935); // error
   static const Color kSuccess = Color(0xFF2E7D32);
+  static const Color kWarning = Color(0xFFF9A825);
+  //green normal
+  static const Color kGreen = Color(0xFF4CAF50);
 }

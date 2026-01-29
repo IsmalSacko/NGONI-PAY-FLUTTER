@@ -1,109 +1,93 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:ngoni_pay/features/invoice/controller/invoice_controller.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
-import 'package:ngoni_pay/common/utils/kstrings.dart';
-import 'package:ngoni_pay/common/utils/widgets/back_button.dart';
 
-class InvoiceCreateScreen extends StatelessWidget {
-  const InvoiceCreateScreen({super.key});
+class InvoiceScreen extends StatelessWidget {
+  final int paymentId;
+
+  const InvoiceScreen({super.key, required this.paymentId});
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final controller = context.watch<InvoiceController>();
+
+    Future.microtask(() {
+      if (controller.invoice == null && !controller.isLoading) {
+        controller.loadInvoice(paymentId);
+      }
+    });
+
+    if (controller.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (controller.error != null) {
+      return Scaffold(body: Center(child: Text(controller.error!)));
+    }
+
+    final invoice = controller.invoice!;
+    final date = DateFormat('dd MMM yyyy').format(invoice.createdAt);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F4FF),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: SizedBox(
-            height: size.height,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Bouton retour
-                if (GoRouter.of(context).canPop())
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: AppBackButton(),
-                    ),
-                  ),
-                const Icon(
-                  Icons.receipt_long_outlined,
-                  size: 64,
-                  color: Kolors.kPrimary,
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  AppText.kCreateInvoice,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Kolors.kDark,
-                  ),
-                ),
-                const SizedBox(height: 32),
+      appBar: AppBar(
+        title: const Text('Facture'),
+        backgroundColor: Kolors.kPrimary,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Kolors.kWhite,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                invoice.invoiceNumber,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
 
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Kolors.kWhite,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Kolors.kGrayLight.withValues(alpha: 0.4),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      TextField(
-                        decoration: InputDecoration(
-                          labelText: AppText.kInvoiceNumber,
-                          prefixIcon: const Icon(Icons.numbers_outlined),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: AppText.kTotalAmount,
-                          prefixIcon: const Icon(Icons.attach_money),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 48,
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Kolors.kPrimary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text(
-                            AppText.kSubmit,
-                            style: TextStyle(color: Kolors.kWhite),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+              Text('Date : $date'),
+              const Divider(height: 32),
+
+              Text('Montant', style: Theme.of(context).textTheme.bodyMedium),
+              const SizedBox(height: 4),
+              Text(
+                '${invoice.totalAmount.toStringAsFixed(0)} FCFA',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: Kolors.kPrimary,
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
-            ),
+              ),
+
+              const Spacer(),
+
+              ElevatedButton.icon(
+                onPressed: invoice.pdfPath == null
+                    ? null
+                    : () {
+                        // plus tard : ouvrir / partager PDF
+                      },
+                icon: const Icon(Icons.picture_as_pdf),
+                label: const Text('Télécharger la facture'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Kolors.kPrimary,
+                  minimumSize: const Size(double.infinity, 48),
+                ),
+              ),
+            ],
           ),
         ),
       ),
