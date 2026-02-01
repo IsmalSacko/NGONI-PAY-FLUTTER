@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
 import 'package:ngoni_pay/common/utils/widgets/back_button.dart';
-import 'package:ngoni_pay/common/utils/widgets/logout_bottom_sheet.dart';
+import 'package:ngoni_pay/core/storage/secure_storage.dart';
 import 'package:provider/provider.dart';
 import 'profile_controller.dart';
 import '../../common/utils/kcolors.dart';
@@ -35,6 +36,23 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         ),
         backgroundColor: Kolors.kPrimary,
         titleTextStyle: appStyle(24, Kolors.kWhite, FontWeight.bold),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: IconButton(
+              icon: const Icon(Icons.logout),
+              color: Kolors.kWhite,
+              style: IconButton.styleFrom(
+                backgroundColor: Kolors.kPrimary.withValues(alpha: 100),
+                iconSize: 30,
+              ),
+              onPressed: () {
+                SecureStorage.clearToken();
+                context.go('/auth/login');
+              },
+            ),
+          ),
+        ],
       ),
       body: controller.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -146,7 +164,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: () {
-                              logoutBottomSheet(context);
+                              //auth/update-profile
+                              context.push('/me/edit');
+                              //logoutBottomSheet(context);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Kolors.kPrimary,
@@ -156,7 +176,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                               ),
                             ),
                             child: const Text(
-                              AppText.kLogout,
+                              AppText.kEditProfile,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,

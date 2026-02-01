@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
@@ -36,13 +37,23 @@ class _LoginScreenState extends State<LoginScreen> {
           "Connexion",
           style: appStyle(20, Kolors.kWhite, FontWeight.w700),
         ),
-        leading: const Padding(
-          padding: EdgeInsets.only(left: 16.0),
-          child: AppBackButton(color: Kolors.kWhite),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: IconButton(
+            icon: const Icon(
+              AntDesign.leftcircle,
+              color: Kolors.kWhite,
+              size: 28,
+            ),
+            onPressed: () {
+              context.go('/');
+            },
+          ),
         ),
         backgroundColor: Kolors.kPrimary,
         elevation: 0,
       ),
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -194,6 +205,26 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: TextDecoration.underline,
                     ),
                   ),
+                ),
+                // REGISTER LINK
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Vous n'avez pas de compte ? "),
+                    GestureDetector(
+                      onTap: () {
+                        context.go('/auth/register');
+                      },
+                      child: Text(
+                        AppText.kRegisterButton,
+                        style: TextStyle(
+                          color: Kolors.kPrimary,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -3,8 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
-import 'package:ngoni_pay/features/businesses/business_model.dart';
-import 'package:ngoni_pay/features/businesses/business_service.dart';
+import 'package:ngoni_pay/features/businesses/models/business_model.dart';
+import 'package:ngoni_pay/features/businesses/services/business_service.dart';
 
 class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;

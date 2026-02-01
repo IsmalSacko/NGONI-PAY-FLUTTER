@@ -238,7 +238,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   );
 
                                   if (success && mounted) {
-                                    context.go('/home');
+                                    context.go('/welcome');
                                   }
                                 },
                           style: ElevatedButton.styleFrom(

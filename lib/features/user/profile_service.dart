@@ -7,4 +7,21 @@ class ProfileService {
     final response = await ApiService.get('/auth/me', auth: true);
     return UserModel.fromJson(response.data['data']);
   }
+
+  // Update user profile
+  static Future<void> updateProfile({
+    required String name,
+    required String phone,
+    String? email,
+  }) async {
+    await ApiService.patch(
+      '/auth/update-profile',
+      auth: true,
+      data: {
+        'name': name,
+        'phone': phone,
+        if (email != null && email.isNotEmpty) 'email': email,
+      },
+    );
+  }
 }

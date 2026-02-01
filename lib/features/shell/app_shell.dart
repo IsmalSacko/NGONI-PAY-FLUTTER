@@ -15,7 +15,7 @@ class AppShell extends StatelessWidget {
     if (location.startsWith('/business/picker')) return 2;
     if (location.startsWith('/business')) return 1;
     if (location.startsWith('/me')) return 4;
-    if (location.startsWith('/home')) return 0; 
+    if (location.startsWith('/welcome')) return 0; 
 
     return 0;
   }
@@ -33,7 +33,7 @@ class AppShell extends StatelessWidget {
         onTap: (index) {
           switch (index) {
             case 0:
-              context.go('/home');
+              context.go('/welcome');
               break;
             case 1:
               context.go('/business/create');

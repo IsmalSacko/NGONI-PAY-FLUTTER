@@ -183,4 +183,17 @@ class AppText {
   static const String kBusinessType = 'Type d\'entreprise';
   static const String kBusinessAddress = 'Adresse de l\'entreprise';
   static const String kIsActive = 'Activer l\'entreprise ou non';
+  static const String kOnboardHome =
+      'Gérez vos paiements facilement avec NGONI PAY';
+  static const String kOnboardWishListMessage =
+      'Créez votre liste de souhaits et réalisez vos objectifs financiers avec NGONI PAY';
+  static const String kWelcomeHeader = 'Bienvenue sur NGONI PAY';
+  static const String kWelcomeMessage =
+      'La solution simple pour gérer vos paiements en toute sécurité';
+  static const String kGetStarted = 'Commencer';
+  // =========================
+  // Welcome Screen Footer
+  static final int now = DateTime.now().year;
+  static final String kWelcomeFooter =
+      '© $now NGONI PAY. Tous droits réservés.';
 }

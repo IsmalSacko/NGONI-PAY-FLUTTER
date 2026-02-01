@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:ngoni_pay/features/businesses/business_model.dart';
-import 'package:ngoni_pay/features/businesses/business_service.dart';
+import 'package:ngoni_pay/features/businesses/models/business_model.dart';
+import 'package:ngoni_pay/features/businesses/services/business_service.dart';
 import 'package:ngoni_pay/features/client/client_service.dart';
 import 'package:ngoni_pay/features/payment/service/payment_service.dart';
 import '../models/payment_create_model.dart';
-
 
 class PaymentController extends ChangeNotifier {
   bool isLoading = false;
@@ -38,13 +37,19 @@ class PaymentController extends ChangeNotifier {
     }
   }
 
-  Future<bool> createPayment({ required int businessId, required PaymentCreateModel payload}) async {
+  Future<bool> createPayment({
+    required int businessId,
+    required PaymentCreateModel payload,
+  }) async {
     try {
       isLoading = true;
       error = null;
       notifyListeners();
 
-      await PaymentService.createPayment(businessId: businessId,payload: payload,);
+      await PaymentService.createPayment(
+        businessId: businessId,
+        payload: payload,
+      );
 
       isLoading = false;
       notifyListeners();
@@ -57,7 +62,7 @@ class PaymentController extends ChangeNotifier {
     }
   }
 
-   Future<void> loadBusiness(int businessId) async {
+  Future<void> loadBusiness(int businessId) async {
     business = await BusinessService.getBusiness(businessId);
     notifyListeners();
   }

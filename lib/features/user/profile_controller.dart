@@ -22,4 +22,26 @@ class ProfileController extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateProfile({
+    required String name,
+    required String phone,
+    String? email,
+  }) async {
+    try {
+      await ProfileService.updateProfile(
+        name: name,
+        phone: phone,
+        email: email,
+      );
+      await loadProfile();
+      return true;
+    } catch (e) {
+      error = 'Impossible de mettre à jour le profil: $e';
+      notifyListeners();
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
 }

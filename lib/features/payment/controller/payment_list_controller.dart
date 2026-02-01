@@ -7,7 +7,11 @@ class PaymentListController extends ChangeNotifier {
   bool isLoading = false;
   String? error;
 
-  Future<void> loadPayments(int businessId) async {
+  Future<void> loadPayments({
+    required int businessId,
+    DateTime? date,
+    String? status,
+  }) async {
     try {
       isLoading = true;
       error = null;
@@ -15,6 +19,8 @@ class PaymentListController extends ChangeNotifier {
 
       payments = await PaymentService.getPaymentsByBusiness(
         businessId: businessId,
+        date: date,
+        status: status,
       );
     } catch (e) {
       error = "Impossible de charger les paiements";

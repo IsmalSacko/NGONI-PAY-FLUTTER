@@ -1,3 +1,5 @@
+import 'package:ngoni_pay/features/invoice/model/invoice_payment_model.dart';
+
 class InvoiceModel {
   final int id;
   final String invoiceNumber;
@@ -5,6 +7,7 @@ class InvoiceModel {
   final String? pdfPath;
   final String sentVia;
   final DateTime createdAt;
+  final InvoicePaymentModel payment;
 
   InvoiceModel({
     required this.id,
@@ -13,6 +16,7 @@ class InvoiceModel {
     this.pdfPath,
     required this.sentVia,
     required this.createdAt,
+    required this.payment,
   });
 
   factory InvoiceModel.fromJson(Map<String, dynamic> json) {
@@ -23,6 +27,7 @@ class InvoiceModel {
       pdfPath: json['pdf_path'],
       sentVia: json['sent_via'],
       createdAt: DateTime.parse(json['created_at']),
+      payment: InvoicePaymentModel.fromJson(json['payment']),
     );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ngoni_pay/features/invoice/model/service/invoice_service.dart';
+import 'package:ngoni_pay/features/invoice/service/invoice_service.dart';
 import '../model/invoice_model.dart';
 
 class InvoiceController extends ChangeNotifier {

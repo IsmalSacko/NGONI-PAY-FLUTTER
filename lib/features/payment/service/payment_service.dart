@@ -9,13 +9,22 @@ class PaymentService {
     required PaymentCreateModel payload,
   }) async {
     await ApiService.post(
-      '/businesses/$businessId/payments',data: payload.toJson(),auth: true,
+      '/businesses/$businessId/payments',
+      data: payload.toJson(),
+      auth: true,
     );
   }
+
   // Récupérer la liste des paiements pour une entreprise donnée
   static Future<List<PaymentListItem>> getPaymentsByBusiness({
     required int businessId,
+    DateTime? date,
+    String? status,
   }) async {
+    final query = <String, dynamic>{};
+    if (date != null) {
+      query['date'] = date.toIso8601String().split('T').first;
+    }
     final response = await ApiService.get(
       '/businesses/$businessId/payments',
       auth: true,

@@ -23,7 +23,9 @@ class _PaymentListScreenState extends State<PaymentListScreen> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      context.read<PaymentListController>().loadPayments(widget.businessId);
+      context.read<PaymentListController>().loadPayments(
+        businessId: widget.businessId,
+      );
     });
   }
 
