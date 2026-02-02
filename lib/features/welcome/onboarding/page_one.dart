@@ -9,11 +9,18 @@ class PageOne extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AppBar(
-      title: const Text('Page One'),
-      backgroundColor: Kolors.kPrimaryLight,
-    );
-    return SizedBox(
+    return Container(
+      foregroundDecoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Kolors.kPrimary.withOpacity(0.1),
+            Kolors.kWhite.withOpacity(0.1),
+          ],
+        ),
+      ),
+      color: Kolors.kWhite,      
       width: 1.sw,
       height: 1.sh,
       child: Stack(

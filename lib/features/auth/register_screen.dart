@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:provider/provider.dart';
 
 import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
-import 'package:ngoni_pay/common/utils/widgets/back_button.dart';
 import 'package:ngoni_pay/features/auth/auth_controller.dart';
 
 enum UserRole { owner, staff }
@@ -40,7 +41,49 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final size = MediaQuery.of(context).size;
     final auth = context.watch<AuthController>();
 
+    if (auth.isLoading) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Kolors.kPrimary),
+                strokeWidth: 4,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Inscription en cours...',
+                style: appStyle(16, Kolors.kBlue, FontWeight.w500),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
+        appBar: AppBar(
+        title: Text(
+          "Inscription",
+          style: appStyle(20, Kolors.kWhite, FontWeight.w700),
+        ),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: IconButton(
+            icon: const Icon(
+              AntDesign.leftcircle,
+              color: Kolors.kWhite,
+              size: 28,
+            ),
+            onPressed: () {
+              context.go('/onboarding');
+            },
+          ),
+        ),
+        backgroundColor: Kolors.kPrimary,
+        elevation: 0,
+      ),
       backgroundColor: const Color(0xFFF6F4FF),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -50,15 +93,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Back
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: AppBackButton(),
-                  ),
-                ),
-
                 // HEADER
                 Column(
                   children: const [

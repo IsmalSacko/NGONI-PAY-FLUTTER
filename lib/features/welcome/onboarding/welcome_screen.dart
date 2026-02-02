@@ -13,27 +13,32 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SizedBox(
-        width: ScreenUtil().screenWidth,
-        height: ScreenUtil().screenHeight,
+    return Container(
+      foregroundDecoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+         colors: [
+            Kolors.kWhite.withValues(alpha: 0.4),
+            Kolors.kWhite.withValues(alpha: 0.1),
+          ]
+        ),
+      ),
         child: Stack(
           children: [
             // Décaler l'image vers le haut
-            Positioned(
-              top:
-                  70, // Ajustez cette valeur pour la position verticale de l'image
-              left: 30,
-              right: 30,
-              child: Center(
-                child: Image.asset(
-                  "assets/images/screen_des.png",
-                  width:
-                      ScreenUtil().screenWidth *
-                      0.6, // Ajustez la taille de l'image
-                ),
+             Positioned(
+            top: 100.h,
+            left: 10.w,
+            right: 10.w,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12.0),
+              child: Image.asset(
+                "assets/images/ngoni_screen1.png",
+                fit: BoxFit.contain,
               ),
             ),
+          ),
 
             // Texte et bouton en bas
             Positioned(
@@ -52,17 +57,18 @@ class WelcomeScreen extends StatelessWidget {
                   Text(
                     AppText.kWelcomeMessage,
                     textAlign: TextAlign.center,
-                    style: appStyle(12, Kolors.kGray, FontWeight.normal),
+                    style: appStyle(13, Kolors.kGray, FontWeight.normal),
                   ),
                   SizedBox(height: 10.h),
                   GradientBtn(
                     text: AppText.kGetStarted,
+                   btnColor: Kolors.kPrimary,
                     btnHieght: 40.h,
                     radius: 20,
                     btnWidth: ScreenUtil().screenWidth - 100,
                     onTap: () {
                       //Storage().setBool('Open', true);
-                      context.go('/welcome');
+                      context.go('/auth/register');
                     },
                   ),
                   SizedBox(height: 10.h),
@@ -70,16 +76,18 @@ class WelcomeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ReusableText(
-                        text: "Already have an account ?",
-                        style: appStyle(12, Kolors.kGray, FontWeight.normal),
+                        text: AppText.kAlreadyAccount,
+                        style: appStyle(13, Kolors.kGray, FontWeight.normal),
                       ),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          context.go('/auth/login');
+                        },
                         child: const Text(
-                          "Sign In",
+                          AppText.kLogin,
                           style: TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF1A73E8),
+                            fontSize: 13,
+                            color: Kolors.kBlue,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -91,7 +99,6 @@ class WelcomeScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 }

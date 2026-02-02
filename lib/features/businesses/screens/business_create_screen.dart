@@ -65,7 +65,6 @@ class _BusinessCreateScreenState extends State<BusinessCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     final controller = context.watch<BusinessController>();
 
     return Scaffold(

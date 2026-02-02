@@ -16,16 +16,11 @@ class AppBackButton extends StatelessWidget {
     return GestureDetector(
       onTap:
           onTap ??
-          () async {
-            if (GoRouter.of(context).canPop()) {
-              GoRouter.of(context).pop();
-            } else if (await isAuthenticated()) {
+          () {
+            
               GoRouter.of(context).go('/dashboard');
-            } else {
-              // Si on ne peut pas pop, aller à l'accueil
-              GoRouter.of(context).go('/welcome');
-            }
-          },
+            } 
+          ,
       child: Icon(
         AntDesign.leftcircle,
         color: color ?? Kolors.kPrimary,

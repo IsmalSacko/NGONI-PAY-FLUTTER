@@ -61,6 +61,7 @@ class AppShell extends StatelessWidget {
           }
         },
         items: const [
+          
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             label: 'Accueil',

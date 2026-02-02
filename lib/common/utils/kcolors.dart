@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 class Kolors {
   // 🎯 Primary (Brand)
   static const Color kPrimary = Color(0xFF6C63FF); // Violet principal
+  static const Color kBlue = Color.fromARGB(255, 26, 115, 232); // Rose corail
   static const Color kPrimaryLight = Color(0xFF9A94FF); // Violet clair
   static const Color kSecondaryLight = Color(
     0xFFEDEBFF,

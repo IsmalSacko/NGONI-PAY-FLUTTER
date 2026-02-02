@@ -22,7 +22,6 @@ import 'package:ngoni_pay/features/payment/payment_list_screen.dart';
 import 'package:ngoni_pay/features/invoice/controller/invoice_controller.dart';
 import 'package:ngoni_pay/features/invoice/invoice_create_screen.dart';
 import 'package:ngoni_pay/features/subscription/subscription_create_screen.dart';
-import 'package:ngoni_pay/features/user/profile_controller.dart';
 import 'package:ngoni_pay/features/user/profile_edit_screen.dart';
 import 'package:ngoni_pay/features/user/user_profile_screen.dart';
 import 'package:provider/provider.dart';
@@ -141,12 +140,7 @@ final GoRouter appRouter = GoRouter(
         ),
         GoRoute(
           path: '/me/edit',
-          builder: (context, state) {
-            return ChangeNotifierProvider(
-              create: (_) => ProfileController(),
-              child: const ProfileEditScreen(),
-            );
-          },
+          builder: (context, state) => const ProfileEditScreen(),
         ),
         GoRoute(
           path: '/me',

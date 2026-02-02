@@ -108,46 +108,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 👋 WELCOME
-            Text(
-              '${AppText.kWelcome},',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              AppText.kAppName,
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-
-            const SizedBox(height: 24),
-
-            // 💰 BALANCE CARD
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Kolors.kWhite,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
+            // LOGO CENTRÉ
+            Center(
+              child: Column(  
                 children: [
-                  // Text(
-                  //   AppText.kBalance,
-                  //   style: Theme.of(
-                  //     context,
-                  //   ).textTheme.bodyMedium?.copyWith(color: Kolors.kDark),
-                  // ),
-                  // const SizedBox(height: 8),
-                  // Text(
-                  //   '${controller.totalAmountSuccess.toStringAsFixed(0)} FCFA',
-                  //   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  //     color: Kolors.kSuccess,
-                  //     fontWeight: FontWeight.w600,
-                  //   ),
-                  // ),
+                  const Text( 
+                    AppText.kWelcome,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Kolors.kPrimary,
+                ),
+              ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(50),
+                child: const Image(
+                  image: AssetImage('assets/images/logo.png'),
+                  height: 100,
+                  width: 100,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            const SizedBox(height: 14),
+            const Text( 
+              AppText.kBalanceDescription,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Kolors.kGray,
+              ),
+            ),
                 ],
               ),
-            ),
-            const SizedBox(height: 12),
+            ),         
+
+            const SizedBox(height: 24),
+            // 💰 BALANCE CARD
             Center(
               child: Text(
                 '7 derniers jours',
@@ -157,7 +153,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Center(
               child: Text(
                 'Total : ${statsController.stats?.last7Days.toStringAsFixed(0)} FCFA',
-                style: appStyle(16, Kolors.kPrimary, FontWeight.w500),
+                style: appStyle(16, Kolors.kBlue, FontWeight.bold),
               ),
             ),
             const SizedBox(height: 12),

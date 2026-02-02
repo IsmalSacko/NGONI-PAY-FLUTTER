@@ -19,7 +19,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<ProfileController>().loadProfile();
+    Future.microtask(() {
+      context.read<ProfileController>().loadProfile();
+    });
   }
 
   @override

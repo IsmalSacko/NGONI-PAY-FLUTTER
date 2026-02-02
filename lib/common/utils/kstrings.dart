@@ -68,12 +68,12 @@ class AppText {
   // 🏠 DASHBOARD
   // =========================
   static const String kDashboardTitle = 'Tableau de bord';
-  static const String kWelcome = 'Bienvenue';
+  static const String kWelcome = 'Bienvenue chez';
   static const String kBalance = 'Solde disponible';
   static const String kRecentTransactions = 'Transactions récentes';
   static const String kViewAll = 'Voir tout';
   static const String kBalanceDescription =
-      'Consultez votre solde actuel en temps réel';
+      'Gérez vos paiements facilement \n et en toute sécurité.';
   static const String kSeeAllTransactions = 'Voir toutes les transactions';
   static const String kNoTransactions =
       'Aucune transaction disponible pour le moment';
@@ -185,8 +185,8 @@ class AppText {
   static const String kIsActive = 'Activer l\'entreprise ou non';
   static const String kOnboardHome =
       'Gérez vos paiements facilement avec NGONI PAY';
-  static const String kOnboardWishListMessage =
-      'Créez votre liste de souhaits et réalisez vos objectifs financiers avec NGONI PAY';
+  static const String kOnboardPaymentsMessage =
+      'NGONI PAY vous permet d\'accepter et de gérer vos paiements en toute simplicité.';
   static const String kWelcomeHeader = 'Bienvenue sur NGONI PAY';
   static const String kWelcomeMessage =
       'La solution simple pour gérer vos paiements en toute sécurité';

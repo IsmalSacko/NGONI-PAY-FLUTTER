@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
-import 'package:ngoni_pay/common/utils/widgets/back_button.dart';
 import 'package:ngoni_pay/common/utils/widgets/reusable_text.dart';
 import 'package:ngoni_pay/features/auth/auth_controller.dart';
 import 'package:provider/provider.dart';
@@ -31,6 +30,27 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final auth = context.watch<AuthController>();
+    
+    if (auth.isLoading) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Kolors.kPrimary),
+                strokeWidth: 4,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Connexion en cours...',
+                style: appStyle(16, Kolors.kBlue, FontWeight.w500),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -46,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
               size: 28,
             ),
             onPressed: () {
-              context.go('/');
+              context.go('/onboarding');
             },
           ),
         ),
@@ -64,24 +84,18 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 // LOGO / TITLE
                 Column(
-                  children: const [
-                    Icon(
-                      Icons.account_balance_wallet_rounded,
-                      size: 64,
-                      color: Kolors.kPrimary,
-                    ),
-                    SizedBox(height: 12),
-                    Text(
-                      AppText.kAppName,
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
-                        color: Kolors.kDark,
-                      ),
-                    ),
-                    SizedBox(height: 6),
-                    Text(
+                  children: [
+                  ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: const Image(                  
+                  image: AssetImage('assets/images/logo.png'),                 
+                  fit: BoxFit.cover,
+                ),
+              ),
+                    const SizedBox(height: 12),
+                   
+                    const SizedBox(height: 6),
+                    const Text(
                       AppText.kLoginSubtitle,
                       style: TextStyle(fontSize: 14, color: Kolors.kGray),
                     ),
@@ -179,14 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               FontWeight.w600,
                             ),
                           ),
-                          // Text(
-                          //   AppText.kLoginButton,
-                          //   style: TextStyle(
-                          //     fontSize: 16,
-                          //     fontWeight: FontWeight.w600,
-                          //     color: Kolors.kWhite,
-                          //   ),
-                          // ),
+                          
                         ),
                       ),
                     ],

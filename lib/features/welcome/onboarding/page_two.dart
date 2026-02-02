@@ -9,31 +9,45 @@ class PageTwo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
+      foregroundDecoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Kolors.kWhite.withValues(alpha: 0.0),
+            Kolors.kPrimary.withValues(alpha: 0.0),
+          ],
+        ),
+      ),
+      color: Kolors.kWhite,      
       width: 1.sw,
       height: 1.sh,
       child: Stack(
         children: [
           Positioned(
             top: 100.h,
-            left: 30.w,
-            right: 30.w,
-            child: Image.asset(
-              "assets/images/screen_des.png",
-              fit: BoxFit.contain,
-              height: 0.5.sh,
+            left: 10.w,
+            right: 10.w,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12.0),
+              child: Image.asset(
+                "assets/images/screen_des.png",
+                fit: BoxFit.contain,
+              ),
             ),
           ),
           Positioned(
             bottom: 100.h,
-            left: 30.w,
-            right: 30.w,
+            left: 10.w,
+            right: 10.w,
             child: Text(
-              AppText.kOnboardWishListMessage,
+              AppText.kOnboardPaymentsMessage,
               textAlign: TextAlign.center,
               style: appStyle(14, Kolors.kGray, FontWeight.normal),
             ),
           ),
+        
         ],
       ),
     );
