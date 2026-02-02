@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final auth = context.watch<AuthController>();
-    
+
     if (auth.isLoading) {
       return Scaffold(
         body: Center(
@@ -85,15 +85,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 // LOGO / TITLE
                 Column(
                   children: [
-                  ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: const Image(                  
-                  image: AssetImage('assets/images/logo.png'),                 
-                  fit: BoxFit.cover,
-                ),
-              ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: const Image(
+                        image: AssetImage('assets/images/logo.png'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                     const SizedBox(height: 12),
-                   
+
                     const SizedBox(height: 6),
                     const Text(
                       AppText.kLoginSubtitle,
@@ -175,7 +175,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                   if (!mounted) return;
                                   if (success) {
-                                    context.go('/dashboard');
+                                    context.go('/business/picker');
                                   }
                                 },
                           style: ElevatedButton.styleFrom(
@@ -193,7 +193,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               FontWeight.w600,
                             ),
                           ),
-                          
                         ),
                       ),
                     ],

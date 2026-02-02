@@ -4,6 +4,7 @@ import 'package:ngoni_pay/features/businesses/controllers/business_controller.da
 import 'package:ngoni_pay/features/businesses/controllers/stats_controller.dart';
 import 'package:ngoni_pay/features/payment/controller/payment_controller.dart';
 import 'package:ngoni_pay/features/payment/controller/payment_list_controller.dart';
+import 'package:ngoni_pay/features/subscription/controllers/subscription_controller.dart';
 import 'package:ngoni_pay/features/user/profile_controller.dart';
 import 'package:provider/provider.dart';
 
@@ -29,6 +30,7 @@ class NgoniPayApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProfileController()),
         ChangeNotifierProvider(create: (_) => BusinessController()),
         ChangeNotifierProvider(create: (_) => PaymentListController()),
+        ChangeNotifierProvider(create: (_) => SubscriptionController()),
       ],
 
       child: ScreenUtilInit(

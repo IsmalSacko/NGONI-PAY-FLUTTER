@@ -21,7 +21,7 @@ import 'package:ngoni_pay/features/payment/payment_create_screen.dart';
 import 'package:ngoni_pay/features/payment/payment_list_screen.dart';
 import 'package:ngoni_pay/features/invoice/controller/invoice_controller.dart';
 import 'package:ngoni_pay/features/invoice/invoice_create_screen.dart';
-import 'package:ngoni_pay/features/subscription/subscription_create_screen.dart';
+import 'package:ngoni_pay/features/subscription/screens/subscription_plan_screen.dart';
 import 'package:ngoni_pay/features/user/profile_edit_screen.dart';
 import 'package:ngoni_pay/features/user/user_profile_screen.dart';
 import 'package:provider/provider.dart';
@@ -39,14 +39,12 @@ final GoRouter appRouter = GoRouter(
     final isWelcome = path == '/welcome';
 
     // Pas connecté → autoriser onboarding / welcome / auth
-    if (!isAuth &&
-        !(isAuthRoute || isOnboarding || isWelcome)) {
+    if (!isAuth && !(isAuthRoute || isOnboarding || isWelcome)) {
       return '/auth/login';
     }
 
     // Déjà connecté → bloquer onboarding / welcome / auth
-    if (isAuth &&
-        (isAuthRoute || isOnboarding || isWelcome)) {
+    if (isAuth && (isAuthRoute || isOnboarding || isWelcome)) {
       return '/dashboard';
     }
 
@@ -88,45 +86,38 @@ final GoRouter appRouter = GoRouter(
         ),
         GoRoute(
           path: '/businessuser',
-          builder: (context, state) =>
-              const BusinessUserCreateScreen(),
+          builder: (context, state) => const BusinessUserCreateScreen(),
         ),
         GoRoute(
           path: '/client/create',
-          builder: (context, state) =>
-              const ClientCreateScreen(),
+          builder: (context, state) => const ClientCreateScreen(),
         ),
         GoRoute(
           path: '/businesses_list',
-          builder: (context, state) =>
-              const BusinessListScreen(),
+          builder: (context, state) => const BusinessListScreen(),
         ),
         GoRoute(
           path: '/business/picker',
-          builder: (context, state) =>
-              const BusinessPickerScreen(),
+          builder: (context, state) => const BusinessPickerScreen(),
         ),
         GoRoute(
           path: '/payments/create/:businessId',
           builder: (context, state) {
-            final businessId =
-                int.parse(state.pathParameters['businessId']!);
+            final businessId = int.parse(state.pathParameters['businessId']!);
             return PaymentCreateScreen(businessId: businessId);
           },
         ),
         GoRoute(
           path: '/payments/list/:businessId',
           builder: (context, state) {
-            final businessId =
-                int.parse(state.pathParameters['businessId']!);
+            final businessId = int.parse(state.pathParameters['businessId']!);
             return PaymentListScreen(businessId: businessId);
           },
         ),
         GoRoute(
           path: '/payments/:paymentId/invoice',
           builder: (context, state) {
-            final paymentId =
-                int.parse(state.pathParameters['paymentId']!);
+            final paymentId = int.parse(state.pathParameters['paymentId']!);
             return ChangeNotifierProvider(
               create: (_) => InvoiceController(),
               child: InvoiceScreen(paymentId: paymentId),
@@ -134,18 +125,24 @@ final GoRouter appRouter = GoRouter(
           },
         ),
         GoRoute(
-          path: '/subscription/create',
-          builder: (context, state) =>
-              const SubscriptionCreateScreen(),
+          path: '/subscription/:businessId',
+          builder: (context, state) {
+            final businessId = int.parse(state.pathParameters['businessId']!);
+            return SubscriptionPlanScreen(businessId: businessId);
+          },
         ),
+        // GoRoute(
+        //   path: '/subscription/create',
+        //   builder: (context, state) =>
+        //       const SubscriptionCreateScreen(),
+        // ),
         GoRoute(
           path: '/me/edit',
           builder: (context, state) => const ProfileEditScreen(),
         ),
         GoRoute(
           path: '/me',
-          builder: (context, state) =>
-              const UserProfileScreen(),
+          builder: (context, state) => const UserProfileScreen(),
         ),
       ],
     ),

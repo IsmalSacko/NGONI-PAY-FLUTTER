@@ -12,6 +12,7 @@ class ActionButton extends StatelessWidget {
   final VoidCallback onTap;
 
   const ActionButton({
+    super.key,
     required this.icon,
     required this.label,
     required this.onTap,
@@ -58,6 +59,7 @@ class TransactionTile extends StatelessWidget {
   final String status;
 
   const TransactionTile({
+    super.key,
     required this.title,
     required this.amount,
     required this.status,
@@ -203,6 +205,7 @@ class PeriodChip extends StatelessWidget {
   final VoidCallback onTap;
 
   const PeriodChip({
+    super.key,
     required this.label,
     required this.selected,
     required this.onTap,

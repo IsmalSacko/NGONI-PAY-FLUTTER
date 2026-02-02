@@ -21,7 +21,7 @@ class AppText {
   static const String kEmail = 'Email';
   static const String kLogin = 'Se connecter';
   static const String kLoginText = 'Connectez-vous pour continuer';
-  static const String kRegister = "S\'inscrire";
+  static const String kRegister = "S'inscrire";
   static const String kRegisterTitle = 'Inscription';
   static const String kRegisterSubtitle = 'Créez un nouveau compte';
   static const String kEnterEmail = 'Entrez votre email';

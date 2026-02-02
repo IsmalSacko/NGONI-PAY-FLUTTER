@@ -7,6 +7,7 @@ import 'package:ngoni_pay/features/businesses/controllers/stats_controller.dart'
 import 'package:ngoni_pay/features/businesses/services/business_service.dart';
 import 'package:ngoni_pay/features/dashboard/stats/daily/daily_screen.dart';
 import 'package:ngoni_pay/features/payment/controller/payment_list_controller.dart';
+import 'package:ngoni_pay/features/subscription/controllers/subscription_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ngoni_pay/features/dashboard/widgets_personal_screen.dart';
@@ -41,6 +42,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _businessId = businessId;
 
       if (businessId != null) {
+        final subscriptionController = context.read<SubscriptionController>();
+
+        await subscriptionController.loadSubscription(businessId);
+
+        if (!mounted) return;
+
+        final subscription = subscriptionController.subscription;
+        if (subscription == null || !subscription.isActive) {
+          context.go('/subscription/$businessId');
+          return;
+        }
+
         await context.read<PaymentListController>().loadPayments(
           businessId: businessId,
         );
@@ -69,6 +82,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final controller = context.watch<PaymentListController>();
     final statsController = context.watch<StatsController>();
     //final data = statsController.dailyStats;
+
+    if (_businessId == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
     if (controller.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -110,37 +127,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             // LOGO CENTRÉ
             Center(
-              child: Column(  
+              child: Column(
                 children: [
-                  const Text( 
+                  const Text(
                     AppText.kWelcome,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: Kolors.kPrimary,
-                ),
-              ),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(50),
-                child: const Image(
-                  image: AssetImage('assets/images/logo.png'),
-                  height: 100,
-                  width: 100,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            const SizedBox(height: 14),
-            const Text( 
-              AppText.kBalanceDescription,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Kolors.kGray,
-              ),
-            ),
+                    ),
+                  ),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(50),
+                    child: const Image(
+                      image: AssetImage('assets/images/logo.png'),
+                      height: 100,
+                      width: 100,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text(
+                    AppText.kBalanceDescription,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Kolors.kGray,
+                    ),
+                  ),
                 ],
               ),
-            ),         
+            ),
 
             const SizedBox(height: 24),
             // 💰 BALANCE CARD

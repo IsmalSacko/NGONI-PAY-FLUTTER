@@ -17,10 +17,8 @@ class AppBackButton extends StatelessWidget {
       onTap:
           onTap ??
           () {
-            
-              GoRouter.of(context).go('/dashboard');
-            } 
-          ,
+            GoRouter.of(context).go('/dashboard');
+          },
       child: Icon(
         AntDesign.leftcircle,
         color: color ?? Kolors.kPrimary,
