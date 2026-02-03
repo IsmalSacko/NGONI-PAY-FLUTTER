@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
+import 'package:ngoni_pay/common/utils/payment_method_label.dart';
 import 'package:ngoni_pay/common/utils/widgets/back_button.dart';
 import 'package:ngoni_pay/features/payment/controller/payment_controller.dart';
 import 'package:ngoni_pay/features/payment/models/payment_create_model.dart';
@@ -115,23 +116,26 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
 
               if (controller.business != null)
                 BusinessChoiseName(controller: controller),
-
-              const Icon(
-                Icons.payments_outlined,
-                size: 64,
-                color: Kolors.kPrimary,
-              ),
-              const SizedBox(height: 12),
-
-              const Text(
-                AppText.kNewPayment,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Kolors.kDark,
+              SizedBox(
+                height: 100,
+                width: 100,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+                  child: const Image(
+                    image: AssetImage('assets/images/logo.png'),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
+                            Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  AppText.kLocalPaymentHint,
+                  style: appStyle(13, Kolors.kGray, FontWeight.w500),
+                ),
+              ),
+              const SizedBox(height: 16),
 
               // CARD
               Container(
@@ -182,6 +186,7 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
                       },
                       decoration: InputDecoration(
                         labelText: AppText.kPhone,
+                        helperText: AppText.kMaliPhoneHelper,
                         prefixIcon: const Icon(Icons.phone_outlined),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -278,6 +283,15 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
                                 AppText.kSubmit,
                                 style: TextStyle(color: Kolors.kWhite),
                               ),
+                      ),
+                      
+                    ),
+                                        const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Méthode sélectionnée : ${paymentMethodLabel(_method)}',
+                        style: appStyle(12, Kolors.kGray, FontWeight.w500),
                       ),
                     ),
                   ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ngoni_pay/common/utils/app_style.dart';
+import 'package:ngoni_pay/common/utils/payment_method_label.dart';
 import 'package:ngoni_pay/features/invoice/controller/invoice_controller.dart';
 import 'package:ngoni_pay/features/invoice/pdf/invoice_pdf_template.dart';
 import 'package:provider/provider.dart';
@@ -127,17 +128,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                 // 💳 PAIEMENT
                 _InfoRow(
                   label: 'Méthode',
-                  value: payment.method == 'card'
-                      ? 'Carte Bancaire'
-                      : payment.method == 'orange_money'
-                      ? 'Orange Money'
-                      : payment.method == 'moov_money'
-                      ? 'Moov Money'
-                      : payment.method == 'wave'
-                      ? 'Wave'
-                      : payment.method == 'cash'
-                      ? 'Espèces'
-                      : payment.method,
+                  value: paymentMethodLabel(payment.method),
                 ),
                 _InfoRow(label: 'Payé le', value: paidDate),
 
@@ -218,7 +209,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                           Facture : ${invoice.invoiceNumber}
                           Client : ${client?.name ?? '-'}
                           Montant : ${invoice.totalAmount.toStringAsFixed(0)} FCFA
-                          Méthode : ${payment.method}
+                          Méthode : ${paymentMethodLabel(payment.method)}
                           Statut : ${payment.status}
                           ''');
                         },

@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:ngoni_pay/common/utils/payment_method_label.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -75,8 +76,8 @@ class InvoicePdfTemplate {
               ]),
 
               _section('PAIEMENT', [
-                _row('Méthode', payment.method),
-                _row('Statut', payment.status.toUpperCase()),
+                _row('Méthode', paymentMethodLabel(payment.method)),
+                _row('Statut', paymentStatusLabel(payment.status).toUpperCase()),
               ]),
 
               pw.SizedBox(height: 24),

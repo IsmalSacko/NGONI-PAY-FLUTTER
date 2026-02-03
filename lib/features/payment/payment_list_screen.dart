@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ngoni_pay/common/utils/payment_method_label.dart';
 import 'package:ngoni_pay/common/utils/widgets/back_button.dart';
 import 'package:provider/provider.dart';
 import 'package:ngoni_pay/common/utils/app_style.dart';
@@ -113,7 +114,7 @@ class _PaymentListScreenState extends State<PaymentListScreen> {
                                 ),
                               ),
                               Text(
-                                item.payment.method,
+                                paymentMethodLabel(item.payment.method).toUpperCase(),
                                 style: appStyle(
                                   13,
                                   Kolors.kGray,
@@ -151,7 +152,7 @@ class _PaymentListScreenState extends State<PaymentListScreen> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        status.toUpperCase(),
+        paymentStatusLabel(status),
         style: appStyle(12, color, FontWeight.bold),
       ),
     );

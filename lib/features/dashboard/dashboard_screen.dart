@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
+import 'package:ngoni_pay/common/utils/payment_method_label.dart';
 import 'package:ngoni_pay/features/businesses/controllers/stats_controller.dart';
 import 'package:ngoni_pay/features/businesses/services/business_service.dart';
 import 'package:ngoni_pay/features/dashboard/stats/daily/daily_screen.dart';
@@ -26,54 +27,61 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-
-    Future.microtask(() async {
-      final prefs = await SharedPreferences.getInstance();
-      int? businessId = prefs.getInt('last_business_id');
-
-      // 🟢 FALLBACK après réinstallation
-      if (businessId == null) {
-        businessId = await BusinessService.getFirstBusinessId();
-        if (businessId != null) {
-          await prefs.setInt('last_business_id', businessId);
-        }
-      }
-
-      _businessId = businessId;
-
-      if (businessId != null) {
-        final subscriptionController = context.read<SubscriptionController>();
-
-        await subscriptionController.loadSubscription(businessId);
-
-        if (!mounted) return;
-
-        final subscription = subscriptionController.subscription;
-        if (subscription == null || !subscription.isActive) {
-          context.go('/subscription/$businessId');
-          return;
-        }
-
-        await context.read<PaymentListController>().loadPayments(
-          businessId: businessId,
-        );
-
-        final statsController = context.read<StatsController>();
-        statsController.loadStats(businessId);
-        statsController.loadDailyStats(businessId: businessId);
-      }
-    });
+    Future.microtask(_bootstrap);
   }
 
-  // PÉRIODE SÉLECTIONNÉE (Method)
+  Future<void> _bootstrap() async {
+    final prefs = await SharedPreferences.getInstance();
+    int? businessId = prefs.getInt('last_business_id');
+
+    if (businessId == null) {
+      businessId = await BusinessService.getFirstBusinessId();
+      if (businessId != null) {
+        await prefs.setInt('last_business_id', businessId);
+      }
+    }
+
+    _businessId = businessId;
+    if (businessId == null) return;
+
+    final subscriptionController = context.read<SubscriptionController>();
+    await subscriptionController.loadSubscription(businessId);
+    if (!mounted) return;
+
+    final subscription = subscriptionController.subscription;
+    if (subscription == null || !subscription.isActive) {
+      context.go('/subscription/$businessId');
+      return;
+    }
+
+    await context
+        .read<PaymentListController>()
+        .loadPayments(businessId: businessId);
+
+    final statsController = context.read<StatsController>();
+    statsController.loadStats(businessId);
+    statsController.loadDailyStats(businessId: businessId);
+  }
+
   void _onPeriodSelected(int days) {
     if (_businessId == null) return;
-
     setState(() => selectedDays = days);
-
     context.read<StatsController>().loadDailyStats(
       businessId: _businessId!,
       days: days,
+    );
+  }
+
+  Future<int?> _getBusinessId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('last_business_id');
+  }
+
+  Future<void> _goToPaymentsOrPicker() async {
+    final businessId = await _getBusinessId();
+    if (!context.mounted) return;
+    context.go(
+      businessId != null ? '/payments/list/$businessId' : '/business/picker',
     );
   }
 
@@ -81,7 +89,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final controller = context.watch<PaymentListController>();
     final statsController = context.watch<StatsController>();
-    //final data = statsController.dailyStats;
 
     if (_businessId == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -125,191 +132,184 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // LOGO CENTRÉ
-            Center(
-              child: Column(
-                children: [
-                  const Text(
-                    AppText.kWelcome,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Kolors.kPrimary,
-                    ),
-                  ),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(50),
-                    child: const Image(
-                      image: AssetImage('assets/images/logo.png'),
-                      height: 100,
-                      width: 100,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  const Text(
-                    AppText.kBalanceDescription,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Kolors.kGray,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
+            _buildHeader(),
             const SizedBox(height: 24),
-            // 💰 BALANCE CARD
-            Center(
-              child: Text(
-                '7 derniers jours',
-                style: appStyle(16, Kolors.kGray, FontWeight.w500),
-              ),
-            ),
-            Center(
-              child: Text(
-                'Total : ${statsController.stats?.last7Days.toStringAsFixed(0)} FCFA',
-                style: appStyle(16, Kolors.kBlue, FontWeight.bold),
-              ),
-            ),
+            _buildSummary(statsController),
             const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                PeriodChip(
-                  label: 'Aujourd’hui',
-                  selected: selectedDays == 1,
-                  onTap: () => _onPeriodSelected(1),
-                ),
-                const SizedBox(width: 8),
-                PeriodChip(
-                  label: '7 jours',
-                  selected: selectedDays == 7,
-                  onTap: () => _onPeriodSelected(7),
-                ),
-                const SizedBox(width: 8),
-                PeriodChip(
-                  label: '30 jours',
-                  selected: selectedDays == 30,
-                  onTap: () => _onPeriodSelected(30),
-                ),
-              ],
-            ),
-
-            // ✅ CORRECTION ICI
-            if (statsController.isLoadingDaily)
-              const Center(child: CircularProgressIndicator())
-            // 👉 CAS AUJOURD’HUI
-            else if (selectedDays == 1)
-              TodaySummary(
-                dailyStats: statsController.dailyStats,
-                businessId: _businessId!,
-              )
-            // 👉 CAS 7 / 30 JOURS
-            else if (statsController.dailyStats.isEmpty)
-              const Center(child: Text('Aucune donnée'))
-            else
-              RevenueLineChart(data: statsController.dailyStats),
-
+            _buildPeriodChips(),
+            _buildDailySection(statsController),
             const SizedBox(height: 24),
-
-            // ⚡ QUICK ACTIONS
-            Row(
-              children: [
-                ActionButton(
-                  icon: Icons.payments_outlined,
-                  label: 'Encaisser',
-                  onTap: () => context.go('/business/picker'),
-                ),
-                const SizedBox(width: 16),
-                ActionButton(
-                  icon: Icons.payment,
-                  label: AppText.kPayments,
-                  onTap: () async {
-                    final prefs = await SharedPreferences.getInstance();
-                    final businessId = prefs.getInt('last_business_id');
-                    if (!context.mounted) return;
-
-                    context.go(
-                      businessId != null
-                          ? '/payments/list/$businessId'
-                          : '/business/picker',
-                    );
-                  },
-                ),
-                const SizedBox(width: 16),
-                ActionButton(
-                  icon: Icons.receipt_long,
-                  label: AppText.kTransactions,
-                  onTap: () async {
-                    final prefs = await SharedPreferences.getInstance();
-                    final businessId = prefs.getInt('last_business_id');
-                    if (!context.mounted) return;
-
-                    context.go(
-                      businessId != null
-                          ? '/payments/list/$businessId'
-                          : '/business/picker',
-                    );
-                  },
-                ),
-              ],
-            ),
-
+            _buildQuickActions(),
             const SizedBox(height: 32),
-
-            // 📄 RECENT TRANSACTIONS
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  AppText.kRecentTransactions,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                TextButton(
-                  onPressed: () async {
-                    final prefs = await SharedPreferences.getInstance();
-                    final businessId = prefs.getInt('last_business_id');
-                    if (!context.mounted) return;
-
-                    context.go(
-                      businessId != null
-                          ? '/payments/list/$businessId'
-                          : '/business/picker',
-                    );
-                  },
-                  child: const Text(AppText.kViewAll),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            Column(
-              children: controller.recentPayments.map((item) {
-                final isSuccess = item.payment.status == 'success';
-                final isPending = item.payment.status == 'pending';
-                final sign = isSuccess ? '+' : '-';
-                final currency = item.payment.currency == 'XOF'
-                    ? 'FCFA'
-                    : item.payment.currency;
-
-                return TransactionTile(
-                  title: 'Paiement ${item.payment.method}',
-                  amount:
-                      '$sign${item.payment.amount.toStringAsFixed(0)} $currency',
-                  status: isSuccess
-                      ? AppText.kStatusSuccess
-                      : isPending
-                      ? AppText.kStatusPending
-                      : AppText.kStatusFailed,
-                );
-              }).toList(),
-            ),
+            _buildRecentTransactions(controller),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Center(
+      child: Column(
+        children: [
+          const Text(
+            AppText.kWelcome,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Kolors.kPrimary,
+            ),
+          ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(50),
+            child: const Image(
+              image: AssetImage('assets/images/logo.png'),
+              height: 100,
+              width: 100,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(height: 14),
+          const Text(
+            AppText.kBalanceDescription,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Kolors.kGray,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummary(StatsController statsController) {
+    final total = statsController.stats?.last7Days.toStringAsFixed(0) ?? '0';
+    return Column(
+      children: [
+        Center(
+          child: Text(
+            '7 derniers jours',
+            style: appStyle(16, Kolors.kGray, FontWeight.w500),
+          ),
+        ),
+        Center(
+          child: Text(
+            'Total : $total FCFA',
+            style: appStyle(16, Kolors.kBlue, FontWeight.bold),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPeriodChips() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        PeriodChip(
+          label: 'Aujourd’hui',
+          selected: selectedDays == 1,
+          onTap: () => _onPeriodSelected(1),
+        ),
+        const SizedBox(width: 8),
+        PeriodChip(
+          label: '7 jours',
+          selected: selectedDays == 7,
+          onTap: () => _onPeriodSelected(7),
+        ),
+        const SizedBox(width: 8),
+        PeriodChip(
+          label: '30 jours',
+          selected: selectedDays == 30,
+          onTap: () => _onPeriodSelected(30),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDailySection(StatsController statsController) {
+    if (statsController.isLoadingDaily) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (selectedDays == 1) {
+      return TodaySummary(
+        dailyStats: statsController.dailyStats,
+        businessId: _businessId!,
+      );
+    }
+
+    if (statsController.dailyStats.isEmpty) {
+      return const Center(child: Text('Aucune donnée'));
+    }
+
+    return RevenueLineChart(data: statsController.dailyStats);
+  }
+
+  Widget _buildQuickActions() {
+    return Row(
+      children: [
+        ActionButton(
+          icon: Icons.payments_outlined,
+          label: 'Encaisser',
+          onTap: () => context.go('/business/picker'),
+        ),
+        const SizedBox(width: 16),
+        ActionButton(
+          icon: Icons.payment,
+          label: AppText.kPayments,
+          onTap: _goToPaymentsOrPicker,
+        ),
+        const SizedBox(width: 16),
+        ActionButton(
+          icon: Icons.receipt_long,
+          label: AppText.kTransactions,
+          onTap: _goToPaymentsOrPicker,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecentTransactions(PaymentListController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              AppText.kRecentTransactions,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            TextButton(
+              onPressed: _goToPaymentsOrPicker,
+              child: const Text(AppText.kViewAll),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Column(
+          children: controller.recentPayments.map((item) {
+            final isSuccess = item.payment.status == 'success';
+            final isPending = item.payment.status == 'pending';
+            final sign = isSuccess ? '+' : '-';
+            final currency =
+                item.payment.currency == 'XOF' ? 'FCFA' : item.payment.currency;
+
+            return TransactionTile(
+              title: 'Paiement ${paymentMethodLabel(item.payment.method)}',
+              amount:
+                  '$sign${item.payment.amount.toStringAsFixed(0)} $currency',
+              status: isSuccess
+                  ? AppText.kStatusSuccess
+                  : isPending
+                      ? AppText.kStatusPending
+                      : AppText.kStatusFailed,
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 }
