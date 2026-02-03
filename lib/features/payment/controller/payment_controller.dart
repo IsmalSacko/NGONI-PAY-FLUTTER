@@ -5,6 +5,26 @@ import 'package:ngoni_pay/features/client/client_service.dart';
 import 'package:ngoni_pay/features/payment/service/payment_service.dart';
 import '../models/payment_create_model.dart';
 
+class PaymentCreationResult {
+  final bool success;
+  final String? paymentUrl;
+  final String? errorMessage;
+
+  const PaymentCreationResult._({
+    required this.success,
+    this.paymentUrl,
+    this.errorMessage,
+  });
+
+  factory PaymentCreationResult.success(String? paymentUrl) {
+    return PaymentCreationResult._(success: true, paymentUrl: paymentUrl);
+  }
+
+  factory PaymentCreationResult.failure(String message) {
+    return PaymentCreationResult._(success: false, errorMessage: message);
+  }
+}
+
 class PaymentController extends ChangeNotifier {
   bool isLoading = false;
   String? error;
@@ -37,7 +57,7 @@ class PaymentController extends ChangeNotifier {
     }
   }
 
-  Future<bool> createPayment({
+  Future<PaymentCreationResult> createPayment({
     required int businessId,
     required PaymentCreateModel payload,
   }) async {
@@ -46,19 +66,19 @@ class PaymentController extends ChangeNotifier {
       error = null;
       notifyListeners();
 
-      await PaymentService.createPayment(
+      final paymentUrl = await PaymentService.createPayment(
         businessId: businessId,
         payload: payload,
       );
 
       isLoading = false;
       notifyListeners();
-      return true;
+      return PaymentCreationResult.success(paymentUrl);
     } catch (e) {
       error = e.toString();
       isLoading = false;
       notifyListeners();
-      return false;
+      return PaymentCreationResult.failure(error ?? 'Unknown error');
     }
   }
 

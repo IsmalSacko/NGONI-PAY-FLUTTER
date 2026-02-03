@@ -53,16 +53,22 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
       method: _method,
     );
 
-    final success = await controller.createPayment(
+    final result = await controller.createPayment(
       businessId: widget.businessId,
       payload: payload,
     );
 
     if (!mounted) return;
 
-    if (success) {
+    if (result.success) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('last_business_id', widget.businessId);
+
+      final paymentUrl = result.paymentUrl;
+      if (paymentUrl != null) {
+        context.push('/payments/checkout', extra: paymentUrl);
+        return;
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

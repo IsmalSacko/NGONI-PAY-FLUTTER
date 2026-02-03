@@ -19,6 +19,7 @@ import 'package:ngoni_pay/features/businesses/screens/business_create_screen.dar
 import 'package:ngoni_pay/features/client/client_create_screen.dart';
 import 'package:ngoni_pay/features/payment/payment_create_screen.dart';
 import 'package:ngoni_pay/features/payment/payment_list_screen.dart';
+import 'package:ngoni_pay/features/payment/payment_webview_screen.dart';
 import 'package:ngoni_pay/features/invoice/controller/invoice_controller.dart';
 import 'package:ngoni_pay/features/invoice/invoice_create_screen.dart';
 import 'package:ngoni_pay/features/subscription/screens/subscription_plan_screen.dart';
@@ -112,6 +113,13 @@ final GoRouter appRouter = GoRouter(
           builder: (context, state) {
             final businessId = int.parse(state.pathParameters['businessId']!);
             return PaymentListScreen(businessId: businessId);
+          },
+        ),
+        GoRoute(
+          path: '/payments/checkout',
+          builder: (context, state) {
+            final url = state.extra as String;
+            return PaymentWebviewScreen(url: url);
           },
         ),
         GoRoute(
