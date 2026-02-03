@@ -37,7 +37,7 @@ class PaymentController extends ChangeNotifier {
     }
   }
 
-  Future<bool> createPayment({
+  Future<String?> createPayment({
     required int businessId,
     required PaymentCreateModel payload,
   }) async {
@@ -46,19 +46,19 @@ class PaymentController extends ChangeNotifier {
       error = null;
       notifyListeners();
 
-      await PaymentService.createPayment(
+      final checkoutUrl = await PaymentService.createPayment(
         businessId: businessId,
         payload: payload,
       );
 
       isLoading = false;
       notifyListeners();
-      return true;
+      return checkoutUrl;
     } catch (e) {
       error = e.toString();
       isLoading = false;
       notifyListeners();
-      return false;
+      return null;
     }
   }
 
