@@ -46,29 +46,61 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
   }
 
   Future<void> _submit(PaymentController controller) async {
+    final phone = phoneController.text.trim();
+    final name = nameController.text.trim();
+    final amountText = amountController.text.trim().replaceAll(',', '.');
+    final amount = double.tryParse(amountText);
+
+    if (phone.isEmpty || phone.length < 8) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez saisir un numéro valide.')),
+      );
+      return;
+    }
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez saisir le nom du client.')),
+      );
+      return;
+    }
+    if (amount == null || amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez saisir un montant valide.')),
+      );
+      return;
+    }
+
     final payload = PaymentCreateModel(
-      phone: phoneController.text.trim(),
-      name: nameController.text.trim(),
-      amount: double.tryParse(amountController.text) ?? 0,
+      phone: phone,
+      name: name,
+      amount: amount,
       currency: 'XOF',
       method: _method,
     );
 
-    final checkoutUrl = await controller.createPayment(
+    final result = await controller.createPayment(
       businessId: widget.businessId,
       payload: payload,
     );
 
     if (!mounted) return;
 
-    if (checkoutUrl != null) {
+    if (result != null) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('last_business_id', widget.businessId);
 
       if (!mounted) return;
 
+      final checkoutUrl = result.checkoutUrl ?? '';
       if (checkoutUrl.trim().isNotEmpty) {
-        context.push('/payments/checkout', extra: checkoutUrl);
+        context.push(
+          '/payments/checkout',
+          extra: {
+            'checkoutUrl': checkoutUrl,
+            'businessId': widget.businessId,
+            'paymentId': result.paymentId,
+          },
+        );
         return;
       }
 
@@ -88,9 +120,19 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
       if (!mounted) return;
       context.go('/business/picker');
     } else if (controller.error != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(controller.error!)));
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Erreur de paiement'),
+          content: Text(controller.error!),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
     }
   }
 

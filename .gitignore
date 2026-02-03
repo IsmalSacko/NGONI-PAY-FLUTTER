@@ -19,7 +19,7 @@ migrate_working_dir/
 .idea/
 .idea_modules/
 .vscode/
-.
+core/config/api_config.dart
 
 
 # The .vscode folder contains launch configuration and tasks you configure in

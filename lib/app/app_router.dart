@@ -119,7 +119,34 @@ final GoRouter appRouter = GoRouter(
         GoRoute(
           path: '/payments/checkout',
           builder: (context, state) {
-            final checkoutUrl = state.extra as String?;
+            String? checkoutUrl;
+            int? businessId;
+            int? paymentId;
+            final extra = state.extra;
+
+            if (extra is String) {
+              checkoutUrl = extra;
+            } else if (extra is Map) {
+              final rawUrl = extra['checkoutUrl'];
+              if (rawUrl is String) {
+                checkoutUrl = rawUrl;
+              }
+
+              final rawBusinessId = extra['businessId'];
+              if (rawBusinessId is int) {
+                businessId = rawBusinessId;
+              } else if (rawBusinessId is String) {
+                businessId = int.tryParse(rawBusinessId);
+              }
+
+              final rawPaymentId = extra['paymentId'];
+              if (rawPaymentId is int) {
+                paymentId = rawPaymentId;
+              } else if (rawPaymentId is String) {
+                paymentId = int.tryParse(rawPaymentId);
+              }
+            }
+
             if (checkoutUrl == null || checkoutUrl.isEmpty) {
               return const Scaffold(
                 body: Center(
@@ -127,7 +154,11 @@ final GoRouter appRouter = GoRouter(
                 ),
               );
             }
-            return PaymentWebViewScreen(checkoutUrl: checkoutUrl);
+            return PaymentWebViewScreen(
+              checkoutUrl: checkoutUrl,
+              businessId: businessId,
+              paymentId: paymentId,
+            );
           },
         ),
         GoRoute(
