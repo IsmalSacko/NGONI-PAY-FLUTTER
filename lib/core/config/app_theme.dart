@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
 
 class AppTheme {
@@ -10,44 +11,44 @@ class AppTheme {
     colorScheme: ColorScheme.fromSeed(
       seedColor: Kolors.kPrimary,
       primary: Kolors.kPrimary,
-      secondary: Kolors.kPrimaryLight,
+      secondary: Kolors.kBlue,
       background: Kolors.kOffWhite,
       error: Kolors.kRed,
     ),
 
     // 🧱 AppBar
-    appBarTheme: const AppBarTheme(
+    appBarTheme: AppBarTheme(
       centerTitle: true,
       elevation: 0,
-      backgroundColor: Colors.transparent,
-      foregroundColor: Kolors.kDark,
-      titleTextStyle: TextStyle(
+      backgroundColor: Kolors.kPrimary,
+      foregroundColor: Kolors.kWhite,
+      titleTextStyle: GoogleFonts.spaceGrotesk(
         fontSize: 18,
         fontWeight: FontWeight.w600,
-        color: Kolors.kDark,
+        color: Kolors.kWhite,
       ),
     ),
 
     // ✍️ Text Theme
-    textTheme: const TextTheme(
-      headlineLarge: TextStyle(
+    textTheme: GoogleFonts.manropeTextTheme().copyWith(
+      headlineLarge: GoogleFonts.spaceGrotesk(
         fontSize: 28,
         fontWeight: FontWeight.bold,
         color: Kolors.kDark,
       ),
-      headlineMedium: TextStyle(
+      headlineMedium: GoogleFonts.spaceGrotesk(
         fontSize: 22,
         fontWeight: FontWeight.w600,
         color: Kolors.kDark,
       ),
-      titleLarge: TextStyle(
+      titleLarge: GoogleFonts.spaceGrotesk(
         fontSize: 18,
         fontWeight: FontWeight.w600,
         color: Kolors.kDark,
       ),
-      bodyLarge: TextStyle(fontSize: 16, color: Kolors.kDark),
-      bodyMedium: TextStyle(fontSize: 14, color: Kolors.kGray),
-      labelLarge: TextStyle(
+      bodyLarge: GoogleFonts.manrope(fontSize: 16, color: Kolors.kDark),
+      bodyMedium: GoogleFonts.manrope(fontSize: 14, color: Kolors.kGray),
+      labelLarge: GoogleFonts.manrope(
         fontSize: 14,
         fontWeight: FontWeight.w600,
         color: Kolors.kWhite,
@@ -59,16 +60,22 @@ class AppTheme {
       style: ElevatedButton.styleFrom(
         backgroundColor: Kolors.kPrimary,
         foregroundColor: Kolors.kWhite,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         elevation: 0,
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        textStyle: GoogleFonts.manrope(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     ),
 
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: Kolors.kPrimary,
-        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        textStyle: GoogleFonts.manrope(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     ),
 
@@ -77,18 +84,24 @@ class AppTheme {
       filled: true,
       fillColor: Kolors.kWhite,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Kolors.kPrimary),
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Kolors.kBlue),
       ),
-      labelStyle: const TextStyle(color: Kolors.kGray),
+      labelStyle: GoogleFonts.manrope(color: Kolors.kGray),
+    ),
+
+    cardTheme: CardThemeData(
+      color: Kolors.kWhite,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
   );
 }

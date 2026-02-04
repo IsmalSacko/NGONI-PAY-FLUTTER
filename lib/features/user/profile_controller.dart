@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:ngoni_pay/features/user/profile_service.dart';
 import 'package:ngoni_pay/features/user/user_model.dart';
 
@@ -26,12 +27,16 @@ class ProfileController extends ChangeNotifier {
     required String name,
     required String phone,
     String? email,
+    XFile? avatar,
+    bool removeAvatar = false,
   }) async {
     try {
       await ProfileService.updateProfile(
         name: name,
         phone: phone,
         email: email,
+        avatar: avatar,
+        removeAvatar: removeAvatar,
       );
       await loadProfile();
       return true;

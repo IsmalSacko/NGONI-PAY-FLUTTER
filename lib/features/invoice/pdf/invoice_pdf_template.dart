@@ -75,7 +75,13 @@ class InvoicePdfTemplate {
                 _row('Téléphone', client?.phone ?? '-'),
               ]),
 
-              _section('PAIEMENT', [
+      _section('PAIEMENT', [
+                if (payment.purpose == 'subscription' &&
+                    payment.subscriptionPlan != null)
+                  _row(
+                    'Abonnement',
+                    payment.subscriptionPlan!.toUpperCase(),
+                  ),
                 _row('Méthode', paymentMethodLabel(payment.method)),
                 _row('Statut', paymentStatusLabel(payment.status).toUpperCase()),
               ]),

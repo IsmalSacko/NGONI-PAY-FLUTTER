@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image/image.dart' as img;
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
@@ -18,6 +23,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   final nameController = TextEditingController();
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
+  XFile? _avatar;
+  bool _removeAvatar = false;
   // On charge les données utilisateur existantes dans les champs du formulaire
   @override
   void initState() {
@@ -51,6 +58,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       name: nameController.text.trim(),
       phone: phoneController.text.trim(),
       email: emailController.text.trim(),
+      avatar: _avatar,
+      removeAvatar: _removeAvatar,
     );
 
     if (!mounted) return;
@@ -118,14 +127,51 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           child: Column(
             children: [
               // 🧑 AVATAR
-              CircleAvatar(
-                radius: 40,
-                backgroundColor: Kolors.kPrimary.withValues(alpha: 0.05),
-                child: const Icon(
-                  Icons.person,
-                  size: 40,
-                  color: Kolors.kPrimary,
+              GestureDetector(
+                onTap: () => _pickAvatar(context),
+                child: CircleAvatar(
+                  radius: 44,
+                  backgroundColor: Kolors.kPrimary.withValues(alpha: 0.05),
+                  backgroundImage: _avatar != null
+                      ? FileImage(File(_avatar!.path))
+                      : (controller.user?.avatarUrl != null &&
+                              controller.user!.avatarUrl!.isNotEmpty)
+                          ? NetworkImage(controller.user!.avatarUrl!)
+                              as ImageProvider
+                          : null,
+                  child: (_avatar == null &&
+                          (controller.user?.avatarUrl == null ||
+                              controller.user!.avatarUrl!.isEmpty))
+                      ? Text(
+                          controller.user?.name.isNotEmpty == true
+                              ? controller.user!.name[0].toUpperCase()
+                              : '?',
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Kolors.kPrimary,
+                          ),
+                        )
+                      : null,
                 ),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  TextButton(
+                    onPressed: () => _pickAvatar(context),
+                    child: const Text('Changer la photo'),
+                  ),
+                  if (controller.user?.avatarUrl != null &&
+                      controller.user!.avatarUrl!.isNotEmpty)
+                    TextButton(
+                      onPressed: _confirmRemoveAvatar,
+                      child: const Text('Supprimer'),
+                    ),
+                ],
               ),
 
               const SizedBox(height: 24),
@@ -232,5 +278,92 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _pickAvatar(BuildContext context) async {
+    final picker = ImagePicker();
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Caméra'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Galerie'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
+    final picked = await picker.pickImage(
+      source: source,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 85,
+    );
+
+    if (picked == null) return;
+
+    final optimized = await _optimizeToJpeg(picked);
+    setState(() {
+      _avatar = optimized ?? picked;
+      _removeAvatar = false;
+    });
+  }
+
+  Future<XFile?> _optimizeToJpeg(XFile original) async {
+    try {
+      final bytes = await original.readAsBytes();
+      final decoded = img.decodeImage(bytes);
+      if (decoded == null) return null;
+
+      final resized = img.copyResize(decoded, width: 1024);
+      final jpg = img.encodeJpg(resized, quality: 85);
+      final dir = await getTemporaryDirectory();
+      final file = File(
+        '${dir.path}/avatar_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
+      await file.writeAsBytes(jpg, flush: true);
+      return XFile(file.path);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _confirmRemoveAvatar() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Supprimer la photo'),
+        content: const Text(
+          'Voulez-vous supprimer votre photo de profil ?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+
+    if (ok != true) return;
+    setState(() {
+      _avatar = null;
+      _removeAvatar = true;
+    });
   }
 }

@@ -1,29 +1,28 @@
 import 'package:ngoni_pay/core/services/api_service.dart';
+import 'package:ngoni_pay/features/subscription/model/subscription_create_result.dart';
 import 'package:ngoni_pay/features/subscription/model/subscription_model.dart';
 
 class SubscriptionService {
-  static Future<SubscriptionModel> createSubscription({
+  static Future<SubscriptionCreateResult> createSubscription({
     required int businessId,
     required String plan,
+    String? method,
   }) async {
-    final now = DateTime.now();
-    final startsAt = now.toIso8601String();
-
-    // Calculer ends_at selon le plan
-    String? endsAt;
-    if (plan == 'basic') {
-      // Basic : 1 mois
-      endsAt = now.add(const Duration(days: 30)).toIso8601String();
-    } else if (plan == 'pro') {
-      // Pro : 1 an
-      endsAt = DateTime(now.year + 1, now.month, now.day).toIso8601String();
+    String? resolvedMethod = method;
+    if (plan != 'free' && (resolvedMethod == null || resolvedMethod.isEmpty)) {
+      resolvedMethod = 'orange_money';
     }
-    // free : pas de date de fin (endsAt reste null)
-
     final data = {
       "plan": plan,
-      "starts_at": startsAt,
-      if (endsAt != null) "ends_at": endsAt,
+      "starts_at": DateTime.now().toIso8601String(),
+      if (plan != 'free')
+        "method": (resolvedMethod != null && resolvedMethod.isNotEmpty)
+            ? resolvedMethod
+            : 'orange_money',
+      if (plan != 'free')
+        "payment_method": (resolvedMethod != null && resolvedMethod.isNotEmpty)
+            ? resolvedMethod
+            : 'orange_money',
     };
 
     final response = await ApiService.post(
@@ -32,7 +31,46 @@ class SubscriptionService {
       data: data,
     );
 
-    return SubscriptionModel.fromJson(response.data['data']);
+    final body = response.data;
+    SubscriptionModel? subscription;
+    String? checkoutUrl;
+    int? paymentId;
+    String? message;
+
+    if (body is Map) {
+      if (body['data'] is Map) {
+        subscription = SubscriptionModel.fromJson(
+          body['data'] as Map<String, dynamic>,
+        );
+      } else if (body['subscription'] is Map) {
+        subscription = SubscriptionModel.fromJson(
+          body['subscription'] as Map<String, dynamic>,
+        );
+      }
+
+      final rawUrl = body['checkout_url'];
+      if (rawUrl is String && rawUrl.trim().isNotEmpty) {
+        checkoutUrl = rawUrl.trim();
+      }
+
+      final rawId = body['payment_id'];
+      if (rawId is int) {
+        paymentId = rawId;
+      } else if (rawId is String) {
+        paymentId = int.tryParse(rawId);
+      }
+
+      if (body['message'] is String) {
+        message = body['message'] as String;
+      }
+    }
+
+    return SubscriptionCreateResult(
+      subscription: subscription,
+      checkoutUrl: checkoutUrl,
+      paymentId: paymentId,
+      message: message,
+    );
   }
 
   static Future<SubscriptionModel?> getSubscription(int businessId) async {

@@ -4,7 +4,10 @@ import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
 import 'package:ngoni_pay/common/utils/widgets/back_button.dart';
 import 'package:ngoni_pay/core/storage/secure_storage.dart';
+import 'package:ngoni_pay/features/businesses/services/business_service.dart';
+import 'package:ngoni_pay/features/subscription/controllers/subscription_controller.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'profile_controller.dart';
 import '../../common/utils/kcolors.dart';
 
@@ -16,17 +19,39 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
+  int? _businessId;
+
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
       context.read<ProfileController>().loadProfile();
+      _bootstrapSubscription();
     });
+  }
+
+  Future<void> _bootstrapSubscription() async {
+    final prefs = await SharedPreferences.getInstance();
+    int? businessId = prefs.getInt('last_business_id');
+
+    if (businessId == null) {
+      businessId = await BusinessService.getFirstBusinessId();
+      if (businessId != null) {
+        await prefs.setInt('last_business_id', businessId);
+      }
+    }
+
+    _businessId = businessId;
+    if (businessId == null) return;
+
+    if (!mounted) return;
+    await context.read<SubscriptionController>().loadSubscription(businessId);
   }
 
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<ProfileController>();
+    final subscription = context.watch<SubscriptionController>().subscription;
 
     return Scaffold(
       appBar: AppBar(
@@ -74,7 +99,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: Colors.grey[50],
+                      gradient: LinearGradient(
+                        colors: [Kolors.kPrimary, Kolors.kPrimaryLight],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
                       borderRadius: const BorderRadius.only(
                         bottomLeft: Radius.circular(30),
                         bottomRight: Radius.circular(30),
@@ -85,28 +114,39 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       children: [
                         CircleAvatar(
                           radius: 50,
-                          backgroundColor: Kolors.kPrimary.withValues(
-                            alpha: 100,
+                          backgroundColor: Kolors.kWhite.withValues(
+                            alpha: 0.15,
                           ),
                           child: CircleAvatar(
-                            radius: 48,
+                            radius: 46,
                             backgroundColor: Colors.white,
-                            child: Text(
-                              controller.user!.name.isNotEmpty
-                                  ? controller.user!.name[0].toUpperCase()
-                                  : '?',
-                              style: const TextStyle(
-                                fontSize: 40,
-                                fontWeight: FontWeight.bold,
-                                color: Kolors.kPrimary,
-                              ),
-                            ),
+                            backgroundImage:
+                                controller.user!.avatarUrl != null &&
+                                        controller.user!.avatarUrl!.isNotEmpty
+                                    ? NetworkImage(
+                                        controller.user!.avatarUrl!,
+                                      )
+                                    : null,
+                            child: (controller.user!.avatarUrl == null ||
+                                    controller.user!.avatarUrl!.isEmpty)
+                                ? Text(
+                                    controller.user!.name.isNotEmpty
+                                        ? controller.user!.name[0]
+                                            .toUpperCase()
+                                        : '?',
+                                    style: const TextStyle(
+                                      fontSize: 40,
+                                      fontWeight: FontWeight.bold,
+                                      color: Kolors.kPrimary,
+                                    ),
+                                  )
+                                : null,
                           ),
                         ),
                         const SizedBox(height: 15),
                         Text(
                           controller.user!.email ?? 'Pas d\'email',
-                          style: appStyle(22, Kolors.kDark, FontWeight.w600),
+                          style: appStyle(20, Kolors.kWhite, FontWeight.w600),
                         ),
                         const SizedBox(height: 5),
                         Container(
@@ -115,7 +155,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: Kolors.kPrimary.withValues(alpha: 0.15),
+                            color: Kolors.kWhite.withValues(alpha: 0.18),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -124,7 +164,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                 : AppText.kRoleStaff,
                             style: const TextStyle(
                               fontSize: 12,
-                              color: Kolors.kPrimary,
+                              color: Kolors.kWhite,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -137,6 +177,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       children: [
+                        if (subscription != null)
+                          _subscriptionCard(context, subscription),
                         _itemCard(
                           Icons.person,
                           AppText.kPkAppName,
@@ -260,6 +302,121 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _subscriptionCard(BuildContext context, subscription) {
+    final plan = subscription.plan.toString().toUpperCase();
+    final isActive = subscription.isActive == true;
+    final endsAt = subscription.endsAt != null
+        ? subscription.endsAt.toLocal().toString().split(' ')[0]
+        : '-';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Kolors.kPrimary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Kolors.kPrimary.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Abonnement',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Chip(
+                label: Text(plan),
+                backgroundColor: Kolors.kPrimary.withValues(alpha: 0.12),
+              ),
+              const SizedBox(width: 8),
+              Chip(
+                label: Text(isActive ? 'Actif' : 'Inactif'),
+                backgroundColor:
+                    (isActive ? Kolors.kSuccess : Kolors.kGold)
+                        .withValues(alpha: 0.12),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text('Fin : $endsAt', style: appStyle(12, Kolors.kGray, FontWeight.w500)),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              SizedBox(
+                width: MediaQuery.of(context).size.width < 360
+                    ? double.infinity
+                    : (MediaQuery.of(context).size.width - 64) / 2,
+                child: OutlinedButton(
+                  onPressed: _businessId == null
+                      ? null
+                      : () => context.go('/subscription/$_businessId'),
+                  child: const Text('Gérer l’abonnement'),
+                ),
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width < 360
+                    ? double.infinity
+                    : (MediaQuery.of(context).size.width - 64) / 2,
+                child: ElevatedButton(
+                  onPressed: _businessId == null
+                      ? null
+                      : () async {
+                          final ok = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Passer au Free'),
+                              content: const Text(
+                                'Votre abonnement Basic/Pro sera arrêté et vous passerez au plan Free.',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(false),
+                                  child: const Text('Annuler'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(true),
+                                  child: const Text('Confirmer'),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (ok != true || !mounted) return;
+
+                          await context
+                              .read<SubscriptionController>()
+                              .createSubscription(
+                                businessId: _businessId!,
+                                plan: 'free',
+                              );
+
+                          await context
+                              .read<SubscriptionController>()
+                              .loadSubscription(_businessId!);
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Kolors.kPrimary,
+                  ),
+                  child: const Text(
+                    'Plan Free',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

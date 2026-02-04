@@ -4,6 +4,7 @@ class UserModel {
   final String phone;
   final String? email;
   final String role;
+  final String? avatarUrl;
   final DateTime createdAt;
 
   UserModel({
@@ -12,6 +13,7 @@ class UserModel {
     required this.phone,
     this.email,
     required this.role,
+    this.avatarUrl,
     required this.createdAt,
   });
 
@@ -22,6 +24,7 @@ class UserModel {
       phone: json['phone'] ?? '',
       email: json['email'],
       role: json['role'] ?? '',
+      avatarUrl: json['avatar_url'],
       createdAt: DateTime.parse(json['created_at']),
     );
   }

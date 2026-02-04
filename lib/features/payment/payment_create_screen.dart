@@ -9,6 +9,7 @@ import 'package:ngoni_pay/common/utils/widgets/back_button.dart';
 import 'package:ngoni_pay/features/payment/controller/payment_controller.dart';
 import 'package:ngoni_pay/features/payment/models/payment_create_model.dart';
 import 'package:ngoni_pay/features/payment/widgets/business_choised_name.dart';
+import 'package:ngoni_pay/features/subscription/controllers/subscription_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -33,6 +34,7 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
     super.initState();
     Future.microtask(() {
       context.read<PaymentController>().loadBusiness(widget.businessId);
+      context.read<SubscriptionController>().loadSubscription(widget.businessId);
     });
   }
 
@@ -76,6 +78,7 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
       amount: amount,
       currency: 'XOF',
       method: _method,
+      startsAt: DateTime.now().toIso8601String(),
     );
 
     final result = await controller.createPayment(
@@ -99,14 +102,19 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
             'checkoutUrl': checkoutUrl,
             'businessId': widget.businessId,
             'paymentId': result.paymentId,
+            'successRoute': '/payments/list/${widget.businessId}',
           },
         );
         return;
       }
 
+      if (result.paymentId != null) {
+        context.go('/payments/${result.paymentId}/invoice');
+        return;
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          // mettre une marge en bas
           margin: EdgeInsets.symmetric(vertical: 20, horizontal: 24),
           behavior: SnackBarBehavior.floating,
           content: SizedBox(child: Text('Paiement créé avec succès')),
@@ -114,11 +122,6 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
           duration: Duration(milliseconds: 800),
         ),
       );
-
-      await Future.delayed(const Duration(milliseconds: 800));
-
-      if (!mounted) return;
-      context.go('/business/picker');
     } else if (controller.error != null) {
       await showDialog<void>(
         context: context,
@@ -139,6 +142,9 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<PaymentController>();
+    final subscription = context.watch<SubscriptionController>().subscription;
+    final isFreePlan = subscription?.plan == 'free';
+    final isInactive = subscription == null || !subscription.isActive;
 
     return Scaffold(
       appBar: AppBar(
@@ -165,26 +171,108 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
 
               if (controller.business != null)
                 BusinessChoiseName(controller: controller),
-              SizedBox(
-                height: 100,
-                width: 100,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(50),
-                  child: const Image(
-                    image: AssetImage('assets/images/logo.png'),
-                    fit: BoxFit.cover,
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Kolors.kPrimary, Kolors.kPrimaryLight],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
+                  borderRadius: BorderRadius.circular(18),
                 ),
-              ),
-              const SizedBox(height: 24),
-                            Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  AppText.kLocalPaymentHint,
-                  style: appStyle(13, Kolors.kGray, FontWeight.w500),
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(40),
+                      child: const Image(
+                        image: AssetImage('assets/images/logo.png'),
+                        height: 64,
+                        width: 64,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Nouveau paiement',
+                            style: appStyle(
+                              16,
+                              Kolors.kWhite,
+                              FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            AppText.kLocalPaymentHint,
+                            style: appStyle(
+                              12,
+                              Kolors.kSecondaryLight,
+                              FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Kolors.kWhite.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              (subscription?.plan ?? 'free')
+                                  .toUpperCase(),
+                              style: const TextStyle(
+                                color: Kolors.kWhite,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.6,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
+              const SizedBox(height: 16),
+
+              if (isInactive)
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Kolors.kGold.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.info_outline, color: Kolors.kGold),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          "Aucun abonnement actif. Veuillez choisir un plan.",
+                          style: TextStyle(color: Kolors.kDark),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () =>
+                            context.go('/subscription/${widget.businessId}'),
+                        child: const Text('Voir plans'),
+                      ),
+                    ],
+                  ),
+                ),
 
               // CARD
               Container(
@@ -192,13 +280,7 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
                 decoration: BoxDecoration(
                   color: Kolors.kWhite,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Kolors.kGrayLight.withValues(alpha: 0.4),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
+                  border: Border.all(color: Kolors.kGrayLight),
                 ),
                 child: Column(
                   children: [
@@ -281,7 +363,8 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
 
                     // METHOD
                     DropdownButtonFormField<String>(
-                      initialValue: _method,
+                      value: _method,
+                      isExpanded: true,
                       decoration: InputDecoration(
                         labelText: AppText.kPaymentMethod,
                         prefixIcon: const Icon(Icons.credit_card_outlined),
@@ -289,17 +372,23 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      items: const [
-                        DropdownMenuItem(value: 'cash', child: Text('Espèces')),
-                        DropdownMenuItem(
+                      items: [
+                        const DropdownMenuItem(
+                          value: 'cash',
+                          child: Text('Espèces'),
+                        ),
+                        const DropdownMenuItem(
                           value: 'orange_money',
                           child: Text('Orange Money'),
                         ),
-                        DropdownMenuItem(
+                        const DropdownMenuItem(
                           value: 'moov_money',
                           child: Text('Moov Money'),
                         ),
-                        DropdownMenuItem(value: 'wave', child: Text('Wave')),
+                        const DropdownMenuItem(
+                          value: 'wave',
+                          child: Text('Wave'),
+                        ),
                       ],
                       onChanged: (value) {
                         if (value != null) {
@@ -310,12 +399,24 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
 
                     const SizedBox(height: 24),
 
+                    if (subscription?.plan == 'basic' && !isFreePlan)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Plan Basic: 5 paiements PayDunya/mois maximum.',
+                          style: appStyle(12, Kolors.kGray, FontWeight.w500),
+                        ),
+                      ),
+
+                    if (subscription?.plan == 'basic' && !isFreePlan)
+                      const SizedBox(height: 12),
+
                     // SUBMIT
                     SizedBox(
                       width: double.infinity,
                       height: 48,
                       child: ElevatedButton(
-                        onPressed: controller.isLoading
+                        onPressed: controller.isLoading || isInactive
                             ? null
                             : () => _submit(controller),
                         style: ElevatedButton.styleFrom(
@@ -339,7 +440,9 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'Méthode sélectionnée : ${paymentMethodLabel(_method)}',
+                        isFreePlan
+                            ? 'Plan Free: le mode est enregistré pour la facture (pas de paiement en ligne).'
+                            : 'Méthode sélectionnée : ${paymentMethodLabel(_method)}',
                         style: appStyle(12, Kolors.kGray, FontWeight.w500),
                       ),
                     ),

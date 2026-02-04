@@ -50,10 +50,55 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
     }
 
     if (controller.error != null) {
-      return SafeArea(child: Center(child: Text(controller.error!)));
+      return SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(controller.error!),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: () {
+                    context
+                        .read<InvoiceController>()
+                        .loadInvoice(widget.paymentId);
+                  },
+                  child: const Text('Réessayer'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
     }
 
-    final invoice = controller.invoice!;
+    final invoice = controller.invoice;
+    if (invoice == null) {
+      return SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Facture non disponible pour le moment.'),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: () {
+                    context
+                        .read<InvoiceController>()
+                        .loadInvoice(widget.paymentId);
+                  },
+                  child: const Text('Réessayer'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     final payment = invoice.payment;
     final client = payment.client;
 
@@ -75,9 +120,9 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
         ),
         backgroundColor: Kolors.kPrimary,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Center(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
@@ -95,6 +140,25 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Kolors.kPrimary, Kolors.kPrimaryLight],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text(
+                    'Reçu de paiement',
+                    style: TextStyle(
+                      color: Kolors.kWhite,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
                 // 🎫 HEADER
                 Center(
                   child: Column(
@@ -126,6 +190,12 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                 const Divider(height: 32),
 
                 // 💳 PAIEMENT
+                if (payment.purpose == 'subscription' &&
+                    payment.subscriptionPlan != null)
+                  _InfoRow(
+                    label: 'Abonnement',
+                    value: payment.subscriptionPlan!.toUpperCase(),
+                  ),
                 _InfoRow(
                   label: 'Méthode',
                   value: paymentMethodLabel(payment.method),
@@ -157,9 +227,14 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                 const SizedBox(height: 24),
 
                 // 📤 ACTIONS
-                Row(
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
                   children: [
-                    Expanded(
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width < 360
+                          ? double.infinity
+                          : (MediaQuery.of(context).size.width - 56) / 2,
                       child: ElevatedButton.icon(
                         onPressed: () {
                           sendInvoiceViaWhatsApp(invoice);
@@ -174,8 +249,10 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width < 360
+                          ? double.infinity
+                          : (MediaQuery.of(context).size.width - 56) / 2,
                       child: ElevatedButton.icon(
                         onPressed: () {
                           InvoicePdfTemplate.generate(invoice);
@@ -199,9 +276,14 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                 const SizedBox(height: 12),
 
                 // 🔁 PARTAGE SYSTÈME (inchangé)
-                Row(
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
                   children: [
-                    Expanded(
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width < 360
+                          ? double.infinity
+                          : (MediaQuery.of(context).size.width - 56) / 2,
                       child: ElevatedButton.icon(
                         onPressed: () {
                           Share.share('''
@@ -223,8 +305,10 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width < 360
+                          ? double.infinity
+                          : (MediaQuery.of(context).size.width - 56) / 2,
                       child: ElevatedButton.icon(
                         onPressed: () {
                           _shareInvoicePdf(invoice);

@@ -15,25 +15,25 @@ import 'package:flutter/material.dart';
 
 class Kolors {
   // 🎯 Primary (Brand)
-  static const Color kPrimary = Color(0xFF6C63FF); // Violet principal
-  static const Color kBlue = Color.fromARGB(255, 26, 115, 232); // Rose corail
-  static const Color kPrimaryLight = Color(0xFF9A94FF); // Violet clair
-  static const Color kSecondaryLight = Color(
-    0xFFEDEBFF,
-  ); // Fond violet très doux
+  //static const Color kPrimary = Color(0xFF6C63FF); // Slate 900
+  //static const Color kBlue = Color(0xFF3B82F6); // Teal accent
+  static const Color kPrimary = Color(0xFF0F172A); // Slate 900
+  static const Color kBlue = Color(0xFF14B8A6); // Teal accent
+  static const Color kPrimaryLight = Color(0xFF1E293B); // Slate 800
+  static const Color kSecondaryLight = Color(0xFFEFF6FF); // Soft blue
 
   // 🧠 Neutral
-  static const Color kGray = Color(0xFF7A7A7A);
-  static const Color kGrayLight = Color(0xFFD1D1D6);
+  static const Color kGray = Color(0xFF6B7280);
+  static const Color kGrayLight = Color(0xFFE5E7EB);
   static const Color kWhite = Color(0xFFFFFFFF);
-  static const Color kOffWhite = Color(0xFFF6F4FF);
-  static const Color kDark = Color(0xFF2D2D2D);
+  static const Color kOffWhite = Color(0xFFF7F8FB);
+  static const Color kDark = Color(0xFF0B1220);
 
   // ⚠️ Status
-  static const Color kGold = Color(0xFFFFC107); // warning / highlight
-  static const Color kRed = Color(0xFFE53935); // error
-  static const Color kSuccess = Color(0xFF2E7D32);
-  static const Color kWarning = Color(0xFFF9A825);
+  static const Color kGold = Color(0xFFF59E0B); // warning / highlight
+  static const Color kRed = Color(0xFFEF4444); // error
+  static const Color kSuccess = Color(0xFF16A34A);
+  static const Color kWarning = Color(0xFFF59E0B);
   //green normal
-  static const Color kGreen = Color(0xFF4CAF50);
+  static const Color kGreen = Color(0xFF22C55E);
 }

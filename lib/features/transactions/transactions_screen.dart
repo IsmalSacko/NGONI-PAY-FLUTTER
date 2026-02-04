@@ -57,9 +57,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Consumer<PaymentListController>(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Consumer<PaymentListController>(
           builder: (_, controller, __) {
             // 🔄 LOADING
             if (controller.isLoading) {
@@ -81,9 +82,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               );
             }
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                 // 🔍 FILTRES ACTIFS
                 if (widget.date != null)
                   Text(
@@ -118,11 +120,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   ),
 
                 // 📄 LISTE DES TRANSACTIONS
-                Expanded(
-                  child: ListView.separated(
-                    itemCount: controller.payments.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
-                    itemBuilder: (_, index) {
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: controller.payments.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  itemBuilder: (_, index) {
                       final item = controller.payments[index];
                       final payment = item.payment;
 
@@ -167,10 +170,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                       );
                     },
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           },
+          ),
         ),
       ),
     );

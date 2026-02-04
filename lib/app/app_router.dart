@@ -13,6 +13,7 @@ import 'package:ngoni_pay/features/shell/app_shell.dart';
 
 // Connected screens
 import 'package:ngoni_pay/features/dashboard/dashboard_screen.dart';
+import 'package:ngoni_pay/features/dashboard/free_dashboard_screen.dart';
 import 'package:ngoni_pay/features/businessUser/business_user_create_screen.dart';
 import 'package:ngoni_pay/features/businesses/screens/business_list_screen.dart';
 import 'package:ngoni_pay/features/businesses/screens/business_picker_screen.dart';
@@ -81,6 +82,10 @@ final GoRouter appRouter = GoRouter(
         GoRoute(
           path: '/dashboard',
           builder: (context, state) => const DashboardScreen(),
+        ),
+        GoRoute(
+          path: '/dashboard/free',
+          builder: (context, state) => const FreeDashboardScreen(),
         ),
         GoRoute(
           path: '/business/create',
@@ -154,10 +159,12 @@ final GoRouter appRouter = GoRouter(
                 ),
               );
             }
+            final successRoute = extra is Map ? extra['successRoute'] as String? : null;
             return PaymentWebViewScreen(
               checkoutUrl: checkoutUrl,
               businessId: businessId,
               paymentId: paymentId,
+              successRoute: successRoute,
             );
           },
         ),

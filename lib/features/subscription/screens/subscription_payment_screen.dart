@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/features/subscription/controllers/subscription_controller.dart';
 import 'package:ngoni_pay/features/subscription/screens/subscription_success_screen.dart';
+import 'package:ngoni_pay/common/utils/payment_method_label.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
-class SubscriptionPaymentScreen extends StatelessWidget {
+class SubscriptionPaymentScreen extends StatefulWidget {
   final int businessId;
   final String plan;
 
@@ -13,6 +15,14 @@ class SubscriptionPaymentScreen extends StatelessWidget {
     required this.businessId,
     required this.plan,
   });
+
+  @override
+  State<SubscriptionPaymentScreen> createState() =>
+      _SubscriptionPaymentScreenState();
+}
+
+class _SubscriptionPaymentScreenState extends State<SubscriptionPaymentScreen> {
+  String _method = 'orange_money';
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +49,8 @@ class SubscriptionPaymentScreen extends StatelessWidget {
       },
     };
 
-    final currentPlan = planDetails[plan] ?? planDetails['free']!;
-    final imagePath = 'assets/images/subscription_$plan.png';
+    final currentPlan = planDetails[widget.plan] ?? planDetails['free']!;
+    final imagePath = 'assets/images/subscription_${widget.plan}.png';
 
     return Scaffold(
       appBar: AppBar(
@@ -58,12 +68,12 @@ class SubscriptionPaymentScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 child: Image.asset(
                   imagePath,
-                  // height: 250,
-                  width: 10,
+                  height: 200,
+                  width: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      height: 250,
+                      height: 200,
                       decoration: BoxDecoration(
                         color: Kolors.kPrimary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(16),
@@ -108,6 +118,52 @@ class SubscriptionPaymentScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 32),
+            if (widget.plan != 'free') ...[
+              Text(
+                'Méthode de paiement',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: _method,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'cash',
+                    child: Text('Espèces'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'orange_money',
+                    child: Text('Orange Money'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'moov_money',
+                    child: Text('Moov Money'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'wave',
+                    child: Text('Wave'),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value == null) return;
+                  setState(() => _method = value);
+                },
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Méthode sélectionnée : ${paymentMethodLabel(_method)}',
+                style: const TextStyle(fontSize: 12, color: Kolors.kGray),
+              ),
+              const SizedBox(height: 20),
+            ],
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -122,19 +178,75 @@ class SubscriptionPaymentScreen extends StatelessWidget {
                 onPressed: controller.isLoading
                     ? null
                     : () async {
-                        final ok = await controller.createSubscription(
-                          businessId: businessId,
-                          plan: plan,
+                        final result = await controller.createSubscription(
+                          businessId: widget.businessId,
+                          plan: widget.plan,
+                          method: widget.plan == 'free' ? null : _method,
                         );
 
-                        if (ok && context.mounted) {
+                        if (!context.mounted) return;
+
+                        if (result == null) {
+                          final message =
+                              controller.error ?? 'Une erreur est survenue';
+                          await showDialog<void>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Erreur'),
+                              content: Text(message),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(),
+                                  child: const Text('OK'),
+                                ),
+                              ],
+                            ),
+                          );
+                          return;
+                        }
+
+                        if (widget.plan != 'free' &&
+                            result.checkoutUrl != null &&
+                            result.checkoutUrl!.isNotEmpty) {
+                          context.push(
+                            '/payments/checkout',
+                            extra: {
+                              'checkoutUrl': result.checkoutUrl,
+                              'businessId': widget.businessId,
+                              'paymentId': result.paymentId,
+                              'successRoute': '/dashboard',
+                            },
+                          );
+                          return;
+                        }
+
+                        if (result.subscription != null) {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (_) => const SubscriptionSuccessScreen(),
                             ),
                           );
+                          return;
                         }
+
+                        await showDialog<void>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Erreur'),
+                            content: const Text(
+                              'Impossible de lancer le paiement abonnement.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(context).pop(),
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          ),
+                        );
                       },
                 child: controller.isLoading
                     ? const SizedBox(

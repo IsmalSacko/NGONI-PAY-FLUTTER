@@ -20,14 +20,29 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen>
+    with WidgetsBindingObserver {
   int selectedDays = 1;
   int? _businessId;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     Future.microtask(_bootstrap);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _bootstrap();
+    }
   }
 
   Future<void> _bootstrap() async {
@@ -51,6 +66,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final subscription = subscriptionController.subscription;
     if (subscription == null || !subscription.isActive) {
       context.go('/subscription/$businessId');
+      return;
+    }
+    if (subscription.plan == 'free') {
+      context.go('/dashboard/free');
       return;
     }
 
@@ -114,11 +133,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         title: const Text(AppText.kDashboardTitle),
         elevation: 0,
         backgroundColor: Kolors.kPrimary,
-        titleTextStyle: const TextStyle(
-          fontSize: 24,
-          color: Kolors.kWhite,
-          fontWeight: FontWeight.bold,
-        ),
         actions: [
           IconButton(
             onPressed: () {},
@@ -127,55 +141,98 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 24),
-            _buildSummary(statsController),
-            const SizedBox(height: 12),
-            _buildPeriodChips(),
-            _buildDailySection(statsController),
-            const SizedBox(height: 24),
-            _buildQuickActions(),
-            const SizedBox(height: 32),
-            _buildRecentTransactions(controller),
-          ],
+      body: RefreshIndicator(
+        onRefresh: _bootstrap,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 24),
+              _buildSummary(statsController),
+              const SizedBox(height: 12),
+              _buildPeriodChips(),
+              _buildDailySection(statsController),
+              const SizedBox(height: 24),
+              _buildQuickActions(),
+              const SizedBox(height: 32),
+              _buildRecentTransactions(controller),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildHeader() {
-    return Center(
-      child: Column(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Kolors.kPrimary,
+            Kolors.kPrimaryLight,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
         children: [
-          const Text(
-            AppText.kWelcome,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Kolors.kPrimary,
-            ),
-          ),
           ClipRRect(
             borderRadius: BorderRadius.circular(50),
             child: const Image(
               image: AssetImage('assets/images/logo.png'),
-              height: 100,
-              width: 100,
+              height: 72,
+              width: 72,
               fit: BoxFit.cover,
             ),
           ),
-          const SizedBox(height: 14),
-          const Text(
-            AppText.kBalanceDescription,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Kolors.kGray,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  AppText.kWelcome,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Kolors.kWhite,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  AppText.kBalanceDescription,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: Kolors.kSecondaryLight,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Kolors.kWhite.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'TABLEAU PRO',
+                    style: TextStyle(
+                      color: Kolors.kWhite,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -196,7 +253,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Center(
           child: Text(
             'Total : $total FCFA',
-            style: appStyle(16, Kolors.kBlue, FontWeight.bold),
+            style: appStyle(18, Kolors.kBlue, FontWeight.bold),
           ),
         ),
       ],
@@ -248,26 +305,57 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildQuickActions() {
-    return Row(
-      children: [
-        ActionButton(
-          icon: Icons.payments_outlined,
-          label: 'Encaisser',
-          onTap: () => context.go('/business/picker'),
-        ),
-        const SizedBox(width: 16),
-        ActionButton(
-          icon: Icons.payment,
-          label: AppText.kPayments,
-          onTap: _goToPaymentsOrPicker,
-        ),
-        const SizedBox(width: 16),
-        ActionButton(
-          icon: Icons.receipt_long,
-          label: AppText.kTransactions,
-          onTap: _goToPaymentsOrPicker,
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < 360;
+        if (isNarrow) {
+          return Column(
+            children: [
+              ActionButton(
+                expanded: false,
+                icon: Icons.payments_outlined,
+                label: 'Encaisser',
+                onTap: () => context.go('/business/picker'),
+              ),
+              const SizedBox(height: 12),
+              ActionButton(
+                expanded: false,
+                icon: Icons.payment,
+                label: AppText.kPayments,
+                onTap: _goToPaymentsOrPicker,
+              ),
+              const SizedBox(height: 12),
+              ActionButton(
+                expanded: false,
+                icon: Icons.receipt_long,
+                label: AppText.kTransactions,
+                onTap: _goToPaymentsOrPicker,
+              ),
+            ],
+          );
+        }
+        return Row(
+          children: [
+            ActionButton(
+              icon: Icons.payments_outlined,
+              label: 'Encaisser',
+              onTap: () => context.go('/business/picker'),
+            ),
+            const SizedBox(width: 16),
+            ActionButton(
+              icon: Icons.payment,
+              label: AppText.kPayments,
+              onTap: _goToPaymentsOrPicker,
+            ),
+            const SizedBox(width: 16),
+            ActionButton(
+              icon: Icons.receipt_long,
+              label: AppText.kTransactions,
+              onTap: _goToPaymentsOrPicker,
+            ),
+          ],
+        );
+      },
     );
   }
 

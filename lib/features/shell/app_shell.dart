@@ -25,11 +25,13 @@ class AppShell extends StatelessWidget {
     return Scaffold(
       body: child,
 
-     bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex(context),
-        selectedItemColor: Kolors.kPrimary,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: Kolors.kBlue,
+        unselectedItemColor: Kolors.kGray,
         type: BottomNavigationBarType.fixed,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
         onTap: (index) {
           switch (index) {
             case 0:

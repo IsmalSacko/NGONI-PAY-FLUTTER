@@ -4,6 +4,7 @@ class PaymentCreateModel {
   final double amount;
   final String currency;
   final String method;
+  final String? startsAt;
 
   PaymentCreateModel({
     required this.phone,
@@ -11,6 +12,7 @@ class PaymentCreateModel {
     required this.amount,
     this.currency = 'XOF',
     required this.method,
+    this.startsAt,
   });
 
   Map<String, dynamic> toJson() {
@@ -20,6 +22,7 @@ class PaymentCreateModel {
       'amount': amount,
       'currency': currency,
       'method': method,
+      if (startsAt != null && startsAt!.isNotEmpty) 'starts_at': startsAt,
     };
   }
 }

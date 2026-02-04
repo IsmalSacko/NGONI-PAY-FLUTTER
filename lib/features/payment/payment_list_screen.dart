@@ -52,87 +52,97 @@ class _PaymentListScreenState extends State<PaymentListScreen> {
             ? Center(child: Text(controller.error!))
             : controller.payments.isEmpty
             ? const Center(child: Text('Aucun paiement'))
-            : ListView.builder(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 24,
-                ),
-                itemCount: controller.payments.length,
-                itemBuilder: (context, index) {
-                  final item = controller.payments[index];
-                  final isSuccess = item.payment.status == 'success';
-
-                  return InkWell(
-                    borderRadius: BorderRadius.circular(16),
-                    onTap: isSuccess
-                        ? () {
-                            // 👉 ICI : OUVERTURE DE LA FACTURE
-                            context.push(
-                              '/payments/${item.payment.id}/invoice',
-                            );
-                          }
-                        : null, // ❌ rien si pas success
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Kolors.kWhite,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Kolors.kGrayLight.withValues(alpha: 0.4),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // 👤 CLIENT
-                          Text(
-                            item.client.name,
-                            style: appStyle(16, Kolors.kDark, FontWeight.bold),
-                          ),
-                          Text(
-                            item.client.phone,
-                            style: appStyle(13, Kolors.kGray, FontWeight.w400),
-                          ),
-
-                          const Divider(height: 24),
-
-                          // 💰 MONTANT + MÉTHODE
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '${item.payment.amount.toStringAsFixed(0)} FCFA',
-                                style: appStyle(
-                                  18,
-                                  Kolors.kPrimary,
-                                  FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                paymentMethodLabel(item.payment.method).toUpperCase(),
-                                style: appStyle(
-                                  13,
-                                  Kolors.kGray,
-                                  FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 8),
-
-                          // 📌 STATUT
-                          _statusBadge(item.payment.status),
-                        ],
-                      ),
-                    ),
-                  );
+            : RefreshIndicator(
+                onRefresh: () async {
+                  await context.read<PaymentListController>().loadPayments(
+                        businessId: widget.businessId,
+                      );
                 },
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 24,
+                  ),
+                  itemCount: controller.payments.length,
+                  itemBuilder: (context, index) {
+                    final item = controller.payments[index];
+                    final isSuccess = item.payment.status == 'success';
+
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: isSuccess
+                          ? () {
+                              // 👉 ICI : OUVERTURE DE LA FACTURE
+                              context.push(
+                                '/payments/${item.payment.id}/invoice',
+                              );
+                            }
+                          : null, // ❌ rien si pas success
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Kolors.kWhite,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Kolors.kGrayLight),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 👤 CLIENT
+                            Text(
+                              item.client.name,
+                              style: appStyle(16, Kolors.kDark, FontWeight.bold),
+                            ),
+                            Text(
+                              item.client.phone,
+                              style: appStyle(13, Kolors.kGray, FontWeight.w400),
+                            ),
+
+                            const Divider(height: 24),
+
+                            // 💰 MONTANT + MÉTHODE
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    '${item.payment.amount.toStringAsFixed(0)} FCFA',
+                                    style: appStyle(
+                                      18,
+                                      Kolors.kPrimary,
+                                      FontWeight.bold,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    paymentMethodLabel(item.payment.method)
+                                        .toUpperCase(),
+                                    style: appStyle(
+                                      13,
+                                      Kolors.kGray,
+                                      FontWeight.w500,
+                                    ),
+                                    textAlign: TextAlign.right,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            // 📌 STATUT
+                            _statusBadge(item.payment.status),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
       ),
     );
