@@ -86,13 +86,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       backgroundColor: const Color(0xFFF6F4FF),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: SizedBox(
-            height: size.height - MediaQuery.of(context).padding.top,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
                 // HEADER
                 Column(
                   children: const [
@@ -129,7 +131,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Kolors.kGrayLight.withValues(alpha: 0.4),
+                        color: Kolors.kGrayLight.withOpacity(0.4),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -322,9 +324,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
