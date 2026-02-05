@@ -15,8 +15,8 @@ class PageOne extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Kolors.kPrimary.withOpacity(0.1),
-            Kolors.kWhite.withOpacity(0.1),
+            Kolors.kPrimary.withValues(alpha: 0.0),
+            Kolors.kWhite.withValues(alpha: 0.0),
           ],
         ),
       ),

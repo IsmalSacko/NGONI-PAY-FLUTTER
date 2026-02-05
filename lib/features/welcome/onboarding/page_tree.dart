@@ -32,7 +32,7 @@ class PageThree extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12.0),
               child: Image.asset(
-                "assets/images/screen_image.png",
+                "assets/images/vendeur.png",
                 fit: BoxFit.contain,
               ),
             ),

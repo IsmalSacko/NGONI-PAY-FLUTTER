@@ -27,7 +27,7 @@ class AppShell extends StatelessWidget {
 
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex(context),
-        selectedItemColor: Kolors.kBlue,
+        selectedItemColor: Kolors.kPrimaryLight,
         unselectedItemColor: Kolors.kGray,
         type: BottomNavigationBarType.fixed,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
