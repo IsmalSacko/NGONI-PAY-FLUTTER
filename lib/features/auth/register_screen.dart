@@ -274,7 +274,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   );
 
                                   if (success && mounted) {
-                                    context.go('/welcome');
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Inscription réussie. Redirection...',
+                                        ),
+                                      ),
+                                    );
+                                    await Future.delayed(
+                                      const Duration(seconds: 2),
+                                    );
+                                    if (mounted) {
+                                      context.go('/me');
+                                    }
                                   }
                                 },
                           style: ElevatedButton.styleFrom(

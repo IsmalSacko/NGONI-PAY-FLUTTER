@@ -28,6 +28,8 @@ class ProfileController extends ChangeNotifier {
     required String phone,
     String? email,
     XFile? avatar,
+    String? avatarUrl,
+    String? avatarBase64,
     bool removeAvatar = false,
   }) async {
     try {
@@ -36,6 +38,8 @@ class ProfileController extends ChangeNotifier {
         phone: phone,
         email: email,
         avatar: avatar,
+        avatarUrl: avatarUrl,
+        avatarBase64: avatarBase64,
         removeAvatar: removeAvatar,
       );
       await loadProfile();

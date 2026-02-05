@@ -68,6 +68,20 @@ class ApiService {
     return _dio.patch(endpoint, data: data);
   }
 
+  // Requête POST multipart (FormData)
+  static Future<Response> postFormData(
+    String endpoint, {
+    required FormData data,
+    bool auth = false,
+  }) async {
+    if (auth) {
+      final token = await SecureStorage.getToken();
+      _dio.options.headers['Authorization'] = 'Bearer $token';
+    }
+
+    return _dio.post(endpoint, data: data);
+  }
+
   // Requête DELETE
   static Future<Response> delete(String endpoint, {bool auth = false}) async {
     if (auth) {

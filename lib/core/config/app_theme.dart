@@ -5,6 +5,11 @@ import 'package:ngoni_pay/common/utils/kcolors.dart';
 class AppTheme {
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
+    fontFamilyFallback: const [
+      'Noto Color Emoji',
+      'Apple Color Emoji',
+      'Segoe UI Emoji',
+    ],
 
     // 🎨 Colors
     scaffoldBackgroundColor: Kolors.kOffWhite,
