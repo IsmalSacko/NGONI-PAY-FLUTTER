@@ -20,7 +20,7 @@ class PageTwo extends StatelessWidget {
           ],
         ),
       ),
-      color: Kolors.kWhite,      
+      color: Kolors.kWhite,
       width: 1.sw,
       height: 1.sh,
       child: Stack(
@@ -32,7 +32,7 @@ class PageTwo extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12.0),
               child: Image.asset(
-                "assets/images/screen_des.png",
+                "assets/images/screen_2des.png",
                 fit: BoxFit.contain,
               ),
             ),
@@ -47,7 +47,6 @@ class PageTwo extends StatelessWidget {
               style: appStyle(14, Kolors.kGray, FontWeight.normal),
             ),
           ),
-        
         ],
       ),
     );

@@ -9,7 +9,7 @@ class PageThree extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      return Container(
+    return Container(
       foregroundDecoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -20,7 +20,7 @@ class PageThree extends StatelessWidget {
           ],
         ),
       ),
-      color: Kolors.kWhite,      
+      color: Kolors.kWhite,
       width: 1.sw,
       height: 1.sh,
       child: Stack(
@@ -32,7 +32,7 @@ class PageThree extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12.0),
               child: Image.asset(
-                "assets/images/screen_image.png",
+                "assets/images/screen_image_2.png",
                 fit: BoxFit.contain,
               ),
             ),
@@ -47,9 +47,8 @@ class PageThree extends StatelessWidget {
               style: appStyle(14, Kolors.kGray, FontWeight.normal),
             ),
           ),
-        
         ],
       ),
     );
-}
+  }
 }

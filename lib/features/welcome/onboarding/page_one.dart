@@ -15,12 +15,12 @@ class PageOne extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Kolors.kPrimary.withOpacity(0.1),
-            Kolors.kWhite.withOpacity(0.1),
+            Kolors.kWhite.withValues(alpha: 0.0),
+            Kolors.kWhite.withValues(alpha: 0.0),
           ],
         ),
       ),
-      color: Kolors.kWhite,      
+      color: Kolors.kWhite,
       width: 1.sw,
       height: 1.sh,
       child: Stack(
@@ -32,7 +32,6 @@ class PageOne extends StatelessWidget {
             child: Image.asset(
               "assets/images/screenprincipal.png",
               fit: BoxFit.contain,
-              
             ),
           ),
           Positioned(
@@ -45,7 +44,6 @@ class PageOne extends StatelessWidget {
               style: appStyle(14, Kolors.kGray, FontWeight.normal),
             ),
           ),
-        
         ],
       ),
     );
