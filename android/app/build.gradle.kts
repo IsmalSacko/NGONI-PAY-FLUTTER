@@ -14,6 +14,16 @@ val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
+val keyAlias = keystoreProperties.getProperty("keyAlias")
+val keyPassword = keystoreProperties.getProperty("keyPassword")
+val storeFilePath = keystoreProperties.getProperty("storeFile")
+val storePassword = keystoreProperties.getProperty("storePassword")
+val isSigningConfigured = listOf(
+    keyAlias,
+    keyPassword,
+    storeFilePath,
+    storePassword
+).all { !it.isNullOrBlank() }
 
 android {
     namespace = "com.ismaeldev.ngonipay"
@@ -39,17 +49,21 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            keyAlias = keystoreProperties["keyAlias"] as String
-            keyPassword = keystoreProperties["keyPassword"] as String
-            storeFile = file(keystoreProperties["storeFile"] as String)
-            storePassword = keystoreProperties["storePassword"] as String
+        if (isSigningConfigured) {
+            create("release") {
+                keyAlias = keyAlias
+                keyPassword = keyPassword
+                storeFile = file(storeFilePath!!)
+                storePassword = storePassword
+            }
         }
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            if (isSigningConfigured) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 }
