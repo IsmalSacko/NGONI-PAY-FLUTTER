@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ngoni_pay/core/auth/auth_notifier.dart';
 import 'package:ngoni_pay/core/storage/secure_storage.dart';
+import 'package:ngoni_pay/core/router/router_keys.dart';
 
 // Public
 import 'package:ngoni_pay/features/auth/login_screen.dart';
@@ -30,6 +32,8 @@ import 'package:ngoni_pay/features/user/user_profile_screen.dart';
 import 'package:provider/provider.dart';
 
 final GoRouter appRouter = GoRouter(
+  navigatorKey: rootNavigatorKey,
+  refreshListenable: authRefreshNotifier,
   initialLocation: '/onboarding',
 
   redirect: (context, state) async {

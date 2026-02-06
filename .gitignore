@@ -47,6 +47,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/app/upload-keystore.jks
+/android/key.properties
 
 # Local temp artifacts
 .tmp_device_base.apk

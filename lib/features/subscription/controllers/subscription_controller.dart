@@ -31,6 +31,11 @@ class SubscriptionController extends ChangeNotifier {
       subscription = result.subscription ?? subscription;
       return result;
     } on DioException catch (e) {
+      if (e.response?.statusCode == 403) {
+        error =
+            "Accès refusé (403). Veuillez créer ou sélectionner une entreprise qui vous appartient.";
+        return null;
+      }
       error = _extractErrorMessage(e.response?.data) ??
           e.message ??
           "Erreur lors de la création de l’abonnement";

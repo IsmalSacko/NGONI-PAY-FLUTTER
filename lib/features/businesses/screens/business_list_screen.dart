@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
+import 'package:ngoni_pay/common/utils/widgets/error_banner.dart';
 import 'package:ngoni_pay/features/businesses/controllers/business_controller.dart';
 
 class BusinessListScreen extends StatefulWidget {
@@ -34,7 +35,12 @@ class _BusinessListScreenState extends State<BusinessListScreen> {
         child: controller.isLoading
             ? const Center(child: CircularProgressIndicator())
             : controller.error != null
-            ? Center(child: Text(controller.error!))
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: ErrorBanner(message: controller.error!),
+                ),
+              )
             : ListView.builder(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,

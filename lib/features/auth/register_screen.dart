@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
+import 'package:ngoni_pay/common/utils/widgets/error_banner.dart';
 import 'package:ngoni_pay/features/auth/auth_controller.dart';
 
 enum UserRole { owner, staff }
@@ -23,6 +24,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   UserRole selectedRole = UserRole.owner; // UI only (backend default)
 
@@ -38,7 +41,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    //final size = MediaQuery.of(context).size;
     final auth = context.watch<AuthController>();
 
     if (auth.isLoading) {
@@ -54,7 +57,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 24),
               Text(
                 'Inscription en cours...',
-                style: appStyle(16, Kolors.kBlue, FontWeight.w500),
+                style: appStyle(16, Kolors.kPrimary, FontWeight.w500),
               ),
             ],
           ),
@@ -63,7 +66,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
 
     return Scaffold(
-        appBar: AppBar(
+      appBar: AppBar(
         title: Text(
           "Inscription",
           style: appStyle(20, Kolors.kWhite, FontWeight.w700),
@@ -95,247 +98,274 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                // HEADER
-                Column(
-                  children: const [
-                    Icon(
-                      Icons.person_add_alt_1_rounded,
-                      size: 64,
-                      color: Kolors.kPrimary,
+                    // HEADER
+                    Column(
+                      children: const [
+                        Icon(
+                          Icons.person_add_alt_1_rounded,
+                          size: 64,
+                          color: Kolors.kPrimary,
+                        ),
+                        SizedBox(height: 12),
+                        Text(
+                          AppText.kAppName,
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.2,
+                            color: Kolors.kDark,
+                          ),
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          AppText.kRegisterSubtitle,
+                          style: TextStyle(fontSize: 14, color: Kolors.kGray),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 12),
-                    Text(
-                      AppText.kAppName,
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
-                        color: Kolors.kDark,
-                      ),
-                    ),
-                    SizedBox(height: 6),
-                    Text(
-                      AppText.kRegisterSubtitle,
-                      style: TextStyle(fontSize: 14, color: Kolors.kGray),
-                    ),
-                  ],
-                ),
 
-                const SizedBox(height: 32),
+                    const SizedBox(height: 32),
 
-                // CARD
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Kolors.kWhite,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Kolors.kGrayLight.withOpacity(0.4),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      // NAME
-                      TextField(
-                        controller: nameController,
-                        decoration: InputDecoration(
-                          labelText: AppText.kFullName,
-                          prefixIcon: const Icon(Icons.person_outline),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // PHONE
-                      TextField(
-                        controller: phoneController,
-                        keyboardType: TextInputType.phone,
-                        decoration: InputDecoration(
-                          labelText: AppText.kTelephone,
-                          prefixIcon: const Icon(Icons.phone_outlined),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // EMAIL
-                      TextField(
-                        controller: emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          labelText: AppText.kEmail,
-                          prefixIcon: const Icon(Icons.email_outlined),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // PASSWORD
-                      TextField(
-                        controller: passwordController,
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          labelText: AppText.kPassword,
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // CONFIRM PASSWORD
-                      TextField(
-                        controller: confirmPasswordController,
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          labelText: AppText.kConfirmPassword,
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // ROLE (UI ONLY)
-                      DropdownButtonFormField<UserRole>(
-                        initialValue: selectedRole,
-                        decoration: InputDecoration(
-                          labelText: AppText.kSelectRole,
-                          prefixIcon: const Icon(Icons.badge_outlined),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        items: const [
-                          DropdownMenuItem(
-                            value: UserRole.owner,
-                            child: Text(AppText.kRoleOwner),
-                          ),
-                          DropdownMenuItem(
-                            value: UserRole.staff,
-                            child: Text(AppText.kRoleStaff),
+                    // CARD
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Kolors.kWhite,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Kolors.kGrayLight.withOpacity(0.4),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
                           ),
                         ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() => selectedRole = value);
-                          }
-                        },
                       ),
-
-                      const SizedBox(height: 16),
-
-                      // ERROR
-                      if (auth.error != null)
-                        Text(
-                          auth.error!,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-
-                      const SizedBox(height: 16),
-
-                      // SUBMIT
-                      SizedBox(
-                        width: double.infinity,
-                        height: 48,
-                        child: ElevatedButton(
-                          onPressed: auth.isLoading
-                              ? null
-                              : () async {
-                                  if (passwordController.text !=
-                                      confirmPasswordController.text) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Les mots de passe ne correspondent pas',
-                                        ),
-                                      ),
-                                    );
-                                    return;
-                                  }
-
-                                  final success = await auth.register(
-                                    name: nameController.text,
-                                    phone: phoneController.text,
-                                    password: passwordController.text,
-                                    email: emailController.text,
-                                  );
-
-                                  if (success && mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Inscription réussie. Redirection...',
-                                        ),
-                                      ),
-                                    );
-                                    await Future.delayed(
-                                      const Duration(seconds: 2),
-                                    );
-                                    if (mounted) {
-                                      context.go('/me');
-                                    }
-                                  }
-                                },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Kolors.kPrimary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                      child: Column(
+                        children: [
+                          // NAME
+                          TextField(
+                            controller: nameController,
+                            decoration: InputDecoration(
+                              labelText: AppText.kFullName,
+                              prefixIcon: const Icon(Icons.person_outline),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
-                            elevation: 0,
                           ),
-                          child: auth.isLoading
-                              ? const CircularProgressIndicator(
-                                  color: Colors.white,
-                                )
-                              : Text(
-                                  AppText.kRegisterButton,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Kolors.kWhite,
-                                  ),
+                          const SizedBox(height: 16),
+
+                          // PHONE
+                          TextField(
+                            controller: phoneController,
+                            keyboardType: TextInputType.phone,
+                            decoration: InputDecoration(
+                              labelText: AppText.kTelephone,
+                              prefixIcon: const Icon(Icons.phone_outlined),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // EMAIL
+                          TextField(
+                            controller: emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              labelText: AppText.kEmail,
+                              prefixIcon: const Icon(Icons.email_outlined),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // PASSWORD
+                          TextField(
+                            controller: passwordController,
+                            obscureText: _obscurePassword,
+                            decoration: InputDecoration(
+                              labelText: AppText.kPassword,
+                              prefixIcon: const Icon(Icons.lock_outline),
+                              suffixIcon: IconButton(
+                                onPressed: () {
+                                  setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  );
+                                },
+                                icon: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
                                 ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
 
-                const SizedBox(height: 24),
+                          // CONFIRM PASSWORD
+                          TextField(
+                            controller: confirmPasswordController,
+                            obscureText: _obscureConfirmPassword,
+                            decoration: InputDecoration(
+                              labelText: AppText.kConfirmPassword,
+                              prefixIcon: const Icon(Icons.lock_outline),
+                              suffixIcon: IconButton(
+                                onPressed: () {
+                                  setState(
+                                    () => _obscureConfirmPassword =
+                                        !_obscureConfirmPassword,
+                                  );
+                                },
+                                icon: Icon(
+                                  _obscureConfirmPassword
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                ),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
 
-                // FOOTER
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      AppText.kAlreadyAccount,
-                      style: TextStyle(color: Kolors.kGray),
-                    ),
-                    TextButton(
-                      onPressed: () => context.go('/auth/login'),
-                      child: const Text(
-                        AppText.kLoginButton,
-                        style: TextStyle(
-                          color: Kolors.kPrimary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                          // ROLE (UI ONLY)
+                          DropdownButtonFormField<UserRole>(
+                            initialValue: selectedRole,
+                            decoration: InputDecoration(
+                              labelText: AppText.kSelectRole,
+                              prefixIcon: const Icon(Icons.badge_outlined),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            items: const [
+                              DropdownMenuItem(
+                                value: UserRole.owner,
+                                child: Text(AppText.kRoleOwner),
+                              ),
+                              DropdownMenuItem(
+                                value: UserRole.staff,
+                                child: Text(AppText.kRoleStaff),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() => selectedRole = value);
+                              }
+                            },
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // ERROR
+                          if (auth.error != null)
+                            ErrorBanner(message: auth.error!),
+
+                          const SizedBox(height: 16),
+
+                          // SUBMIT
+                          SizedBox(
+                            width: double.infinity,
+                            height: 48,
+                            child: ElevatedButton(
+                              onPressed: auth.isLoading
+                                  ? null
+                                  : () async {
+                                      if (passwordController.text !=
+                                          confirmPasswordController.text) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Les mots de passe ne correspondent pas',
+                                            ),
+                                          ),
+                                        );
+                                        return;
+                                      }
+
+                                      final success = await auth.register(
+                                        name: nameController.text,
+                                        phone: phoneController.text,
+                                        password: passwordController.text,
+                                        email: emailController.text,
+                                      );
+
+                                      if (success && mounted) {
+                                        const redirectDelay = Duration(
+                                          milliseconds: 1500,
+                                        );
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Inscription réussie. Redirection vers votre profil...',
+                                            ),
+                                            duration: redirectDelay,
+                                          ),
+                                        );
+                                        await Future.delayed(redirectDelay);
+                                        if (!mounted) return;
+                                        context.go('/me');
+                                      }
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Kolors.kPrimary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: auth.isLoading
+                                  ? const CircularProgressIndicator(
+                                      color: Colors.white,
+                                    )
+                                  : Text(
+                                      AppText.kRegisterButton,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: Kolors.kWhite,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+
+                    const SizedBox(height: 24),
+
+                    // FOOTER
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          AppText.kAlreadyAccount,
+                          style: TextStyle(color: Kolors.kGray),
+                        ),
+                        TextButton(
+                          onPressed: () => context.go('/auth/login'),
+                          child: const Text(
+                            AppText.kLoginButton,
+                            style: TextStyle(
+                              color: Kolors.kPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),

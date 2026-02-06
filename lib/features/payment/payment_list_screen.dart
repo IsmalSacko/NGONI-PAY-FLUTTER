@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ngoni_pay/common/utils/payment_method_label.dart';
 import 'package:ngoni_pay/common/utils/widgets/back_button.dart';
+import 'package:ngoni_pay/common/utils/widgets/error_banner.dart';
 import 'package:provider/provider.dart';
 import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
@@ -49,7 +50,12 @@ class _PaymentListScreenState extends State<PaymentListScreen> {
         child: controller.isLoading
             ? const Center(child: CircularProgressIndicator())
             : controller.error != null
-            ? Center(child: Text(controller.error!))
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: ErrorBanner(message: controller.error!),
+                ),
+              )
             : controller.payments.isEmpty
             ? const Center(child: Text('Aucun paiement'))
             : RefreshIndicator(

@@ -12,93 +12,154 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      foregroundDecoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-
-          colors: [
-            Kolors.kWhite.withValues(alpha: 0.0),
-            Kolors.kWhite.withValues(alpha: 0.0),
-          ],
-        ),
-      ),
-      child: Stack(
-        children: [
-          // Décaler l'image vers le haut
-          Positioned(
-            top: 100.h,
-            left: 10.w,
-            right: 10.w,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12.0),
-              child: Image.asset(
-                "assets/images/ngoni_screen1.png",
-                fit: BoxFit.contain,
-              ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isLandscape = constraints.maxWidth > constraints.maxHeight;
+        final image = ClipRRect(
+          borderRadius: BorderRadius.circular(16.0),
+          child: AspectRatio(
+            aspectRatio: isLandscape ? 4 / 5 : 3 / 4,
+            child: Image.asset(
+              "assets/images/ngoni_screen1.png",
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
             ),
           ),
-
-          // Texte et bouton en bas
-          Positioned(
-            bottom:
-                70, // Ajustez cette valeur pour la position verticale du texte et du bouton
-            left: 30,
-            right: 30,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+        );
+        final titleSize = isLandscape ? 18.0 : 22.0;
+        final bodySize = isLandscape ? 12.0 : 13.0;
+        final content = Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              AppText.kWelcomeHeader,
+              textAlign: TextAlign.center,
+              style: appStyle(titleSize, Kolors.kPrimary, FontWeight.bold),
+            ),
+            Text(
+              AppText.kWelcomeMessage,
+              textAlign: TextAlign.center,
+              style: appStyle(bodySize, Kolors.kGray, FontWeight.normal),
+            ),
+            SizedBox(height: 10.h),
+            GradientBtn(
+              text: AppText.kGetStarted,
+              btnColor: Kolors.kPrimary,
+              btnHieght: 40.h,
+              radius: 20,
+              btnWidth: (ScreenUtil().screenWidth - 100)
+                  .clamp(isLandscape ? 150 : 180, isLandscape ? 260 : 320)
+                  .toDouble(),
+              onTap: () {
+                //Storage().setBool('Open', true);
+                context.go('/auth/register');
+              },
+            ),
+            SizedBox(height: 10.h),
+            Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 6,
+              runSpacing: 4,
               children: [
-                Text(
-                  AppText.kWelcomeHeader,
-                  textAlign: TextAlign.center,
-                  style: appStyle(22, Kolors.kPrimary, FontWeight.bold),
+                ReusableText(
+                  text: AppText.kAlreadyAccount,
+                  style: appStyle(bodySize, Kolors.kGray, FontWeight.normal),
                 ),
-                Text(
-                  AppText.kWelcomeMessage,
-                  textAlign: TextAlign.center,
-                  style: appStyle(13, Kolors.kGray, FontWeight.normal),
-                ),
-                SizedBox(height: 10.h),
-                GradientBtn(
-                  text: AppText.kGetStarted,
-                  btnColor: Kolors.kPrimary,
-                  btnHieght: 40.h,
-                  radius: 20,
-                  btnWidth: ScreenUtil().screenWidth - 100,
-                  onTap: () {
-                    //Storage().setBool('Open', true);
-                    context.go('/auth/register');
+                TextButton(
+                  onPressed: () {
+                    context.go('/auth/login');
                   },
-                ),
-                SizedBox(height: 10.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ReusableText(
-                      text: AppText.kAlreadyAccount,
-                      style: appStyle(13, Kolors.kGray, FontWeight.normal),
+                  child: Text(
+                    AppText.kLogin,
+                    style: TextStyle(
+                      fontSize: bodySize,
+                      color: Kolors.kPrimary,
+                      fontWeight: FontWeight.bold,
                     ),
-                    TextButton(
-                      onPressed: () {
-                        context.go('/auth/login');
-                      },
-                      child: const Text(
-                        AppText.kLogin,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Kolors.kBlue,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),
+          ],
+        );
+
+        return Container(
+          foregroundDecoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Kolors.kWhite.withValues(alpha: 0.0),
+                Kolors.kWhite.withValues(alpha: 0.0),
+              ],
+            ),
           ),
-        ],
-      ),
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 16.w,
+                vertical: isLandscape ? 8.h : 20.h,
+              ),
+              child: SizedBox(
+                width: constraints.maxWidth,
+                height: constraints.maxHeight,
+                child: isLandscape
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Center(
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxHeight: constraints.maxHeight * 0.85,
+                                ),
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  child: image,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 16.w),
+                          Expanded(
+                            flex: 2,
+                            child: SingleChildScrollView(
+                              physics: const BouncingScrollPhysics(),
+                              child: Padding(
+                                padding: EdgeInsets.only(bottom: 12.h),
+                                child: content,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: Column(
+                          children: [
+                            Center(
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxHeight: constraints.maxHeight * 0.6,
+                                ),
+                                child: image,
+                              ),
+                            ),
+                            SizedBox(height: 16.h),
+                            Padding(
+                              padding: EdgeInsets.only(bottom: 12.h),
+                              child: content,
+                            ),
+                          ],
+                        ),
+                      ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

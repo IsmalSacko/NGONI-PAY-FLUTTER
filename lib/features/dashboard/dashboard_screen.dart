@@ -4,6 +4,7 @@ import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
 import 'package:ngoni_pay/common/utils/payment_method_label.dart';
+import 'package:ngoni_pay/common/utils/widgets/error_banner.dart';
 import 'package:ngoni_pay/features/businesses/controllers/stats_controller.dart';
 import 'package:ngoni_pay/features/businesses/services/business_service.dart';
 import 'package:ngoni_pay/features/dashboard/stats/daily/daily_screen.dart';
@@ -49,6 +50,15 @@ class _DashboardScreenState extends State<DashboardScreen>
     final prefs = await SharedPreferences.getInstance();
     int? businessId = prefs.getInt('last_business_id');
 
+    if (businessId != null) {
+      try {
+        await BusinessService.getBusiness(businessId);
+      } catch (_) {
+        businessId = null;
+        await prefs.remove('last_business_id');
+      }
+    }
+
     if (businessId == null) {
       businessId = await BusinessService.getFirstBusinessId();
       if (businessId != null) {
@@ -69,13 +79,18 @@ class _DashboardScreenState extends State<DashboardScreen>
       return;
     }
     if (subscription.plan == 'free') {
-      context.go('/dashboard/free');
-      return;
+      final trialEndsAt = subscription.endsAt;
+      final trialActive = trialEndsAt != null &&
+          trialEndsAt.isAfter(DateTime.now());
+      if (!trialActive) {
+        context.go('/dashboard/free');
+        return;
+      }
     }
 
-    await context
-        .read<PaymentListController>()
-        .loadPayments(businessId: businessId);
+    await context.read<PaymentListController>().loadPayments(
+      businessId: businessId,
+    );
 
     final statsController = context.read<StatsController>();
     statsController.loadStats(businessId);
@@ -110,7 +125,58 @@ class _DashboardScreenState extends State<DashboardScreen>
     final statsController = context.watch<StatsController>();
 
     if (_businessId == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            AppText.kDashboardTitle,
+            style: appStyle(18, Kolors.kWhite, FontWeight.w600),
+          ),
+          elevation: 0,
+          backgroundColor: Kolors.kPrimary,
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.storefront_outlined,
+                  size: 64,
+                  color: Kolors.kPrimary,
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  "Aucune entreprise trouvée",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  "Pour démarrer un abonnement, vous devez d'abord créer une entreprise. L’abonnement dépend du businessId.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Kolors.kGray),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => context.go('/business/create'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Kolors.kPrimary,
+                      foregroundColor: Kolors.kWhite,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text("Créer une entreprise"),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
     }
 
     if (controller.isLoading) {
@@ -120,9 +186,9 @@ class _DashboardScreenState extends State<DashboardScreen>
     if (controller.error != null) {
       return Scaffold(
         body: Center(
-          child: Text(
-            controller.error!,
-            style: Theme.of(context).textTheme.bodyLarge,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: ErrorBanner(message: controller.error!),
           ),
         ),
       );
@@ -130,7 +196,10 @@ class _DashboardScreenState extends State<DashboardScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(AppText.kDashboardTitle),
+        title: Text(
+          AppText.kDashboardTitle,
+          style: appStyle(18, Kolors.kWhite, FontWeight.w600),
+        ),
         elevation: 0,
         backgroundColor: Kolors.kPrimary,
         actions: [
@@ -172,10 +241,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Kolors.kPrimary,
-            Kolors.kPrimaryLight,
-          ],
+          colors: [Kolors.kPrimary, Kolors.kPrimaryLight],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -216,8 +282,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                 ),
                 const SizedBox(height: 10),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Kolors.kWhite.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(20),
@@ -382,8 +450,9 @@ class _DashboardScreenState extends State<DashboardScreen>
             final isSuccess = item.payment.status == 'success';
             final isPending = item.payment.status == 'pending';
             final sign = isSuccess ? '+' : '-';
-            final currency =
-                item.payment.currency == 'XOF' ? 'FCFA' : item.payment.currency;
+            final currency = item.payment.currency == 'XOF'
+                ? 'FCFA'
+                : item.payment.currency;
 
             return TransactionTile(
               title: 'Paiement ${paymentMethodLabel(item.payment.method)}',
@@ -392,8 +461,8 @@ class _DashboardScreenState extends State<DashboardScreen>
               status: isSuccess
                   ? AppText.kStatusSuccess
                   : isPending
-                      ? AppText.kStatusPending
-                      : AppText.kStatusFailed,
+                  ? AppText.kStatusPending
+                  : AppText.kStatusFailed,
             );
           }).toList(),
         ),

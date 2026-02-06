@@ -3,7 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
 import 'package:ngoni_pay/common/utils/widgets/back_button.dart';
-import 'package:ngoni_pay/core/storage/secure_storage.dart';
+import 'package:ngoni_pay/common/utils/widgets/error_banner.dart';
+import 'package:ngoni_pay/features/auth/auth_service.dart';
 import 'package:ngoni_pay/features/businesses/services/business_service.dart';
 import 'package:ngoni_pay/features/subscription/controllers/subscription_controller.dart';
 import 'package:provider/provider.dart';
@@ -33,6 +34,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Future<void> _bootstrapSubscription() async {
     final prefs = await SharedPreferences.getInstance();
     int? businessId = prefs.getInt('last_business_id');
+
+    if (businessId != null) {
+      try {
+        await BusinessService.getBusiness(businessId);
+      } catch (_) {
+        businessId = null;
+        await prefs.remove('last_business_id');
+      }
+    }
 
     if (businessId == null) {
       businessId = await BusinessService.getFirstBusinessId();
@@ -73,8 +83,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 backgroundColor: Kolors.kPrimary.withValues(alpha: 100),
                 iconSize: 30,
               ),
-              onPressed: () {
-                SecureStorage.clearToken();
+              onPressed: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.remove('last_business_id');
+                await AuthService().logout();
+                if (!mounted) return;
                 context.go('/auth/login');
               },
             ),
@@ -85,9 +98,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           ? const Center(child: CircularProgressIndicator())
           : controller.error != null
           ? Center(
-              child: Text(
-                controller.error!,
-                style: const TextStyle(color: Colors.red),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: ErrorBanner(message: controller.error!),
               ),
             )
           : controller.user == null

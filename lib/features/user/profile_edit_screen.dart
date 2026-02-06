@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
+import 'package:ngoni_pay/common/utils/widgets/error_banner.dart';
 import 'package:ngoni_pay/features/user/profile_controller.dart';
 
 class ProfileEditScreen extends StatefulWidget {
@@ -93,9 +94,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       if (!mounted) return;
       context.pop();
     } else if (controller.error != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(controller.error!)));
+      // Affichage inline via ErrorBanner
     }
   }
 
@@ -108,7 +107,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     }
     if (controller.error != null && controller.user == null) {
       return Scaffold(
-        body: Center(child: Text('Erreur : impossible de charger le profil')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: const ErrorBanner(
+              message: 'Erreur : impossible de charger le profil',
+            ),
+          ),
+        ),
       );
     }
     return Scaffold(
@@ -175,6 +181,12 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               ),
 
               const SizedBox(height: 24),
+
+              if (controller.error != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: ErrorBanner(message: controller.error!),
+                ),
 
               // 🧾 FORM CARD
               Container(

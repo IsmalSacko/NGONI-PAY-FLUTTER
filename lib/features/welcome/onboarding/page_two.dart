@@ -9,46 +9,80 @@ class PageTwo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      foregroundDecoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Kolors.kWhite.withValues(alpha: 0.0),
-            Kolors.kOffWhite.withValues(alpha: 0.0),
-          ],
-        ),
-      ),
-      color: Kolors.kWhite,
-      width: 1.sw,
-      height: 1.sh,
-      child: Stack(
-        children: [
-          Positioned(
-            top: 100.h,
-            left: 10.w,
-            right: 10.w,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12.0),
-              child: Image.asset(
-                "assets/images/paydevice.png",
-                fit: BoxFit.contain,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isLandscape = constraints.maxWidth > constraints.maxHeight;
+        final image = ClipRRect(
+          borderRadius: BorderRadius.circular(12.0),
+          child: Image.asset(
+            "assets/images/paydevice.png",
+            fit: BoxFit.contain,
+          ),
+        );
+        final message = Text(
+          AppText.kOnboardPaymentsMessage,
+          textAlign: TextAlign.center,
+          style: appStyle(14, Kolors.kGray, FontWeight.normal),
+        );
+
+        return Container(
+          foregroundDecoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Kolors.kWhite.withValues(alpha: 0.0),
+                Kolors.kOffWhite.withValues(alpha: 0.0),
+              ],
+            ),
+          ),
+          color: Kolors.kWhite,
+          width: 1.sw,
+          height: 1.sh,
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 16.w,
+                vertical: isLandscape ? 8.h : 20.h,
               ),
+              child: isLandscape
+                  ? Row(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxHeight: constraints.maxHeight * 0.9,
+                              ),
+                              child: image,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 16.w),
+                        Expanded(flex: 2, child: message),
+                      ],
+                    )
+                  : Column(
+                      children: [
+                        Expanded(
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxHeight: constraints.maxHeight * 0.6,
+                              ),
+                              child: image,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 16.h),
+                        message,
+                      ],
+                    ),
             ),
           ),
-          Positioned(
-            bottom: 100.h,
-            left: 10.w,
-            right: 10.w,
-            child: Text(
-              AppText.kOnboardPaymentsMessage,
-              textAlign: TextAlign.center,
-              style: appStyle(14, Kolors.kGray, FontWeight.normal),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

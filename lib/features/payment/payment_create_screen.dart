@@ -6,6 +6,7 @@ import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
 import 'package:ngoni_pay/common/utils/payment_method_label.dart';
 import 'package:ngoni_pay/common/utils/widgets/back_button.dart';
+import 'package:ngoni_pay/common/utils/widgets/error_banner.dart';
 import 'package:ngoni_pay/features/payment/controller/payment_controller.dart';
 import 'package:ngoni_pay/features/payment/models/payment_create_model.dart';
 import 'package:ngoni_pay/features/payment/widgets/business_choised_name.dart';
@@ -120,20 +121,6 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
           content: SizedBox(child: Text('Paiement créé avec succès')),
           backgroundColor: Colors.green,
           duration: Duration(milliseconds: 800),
-        ),
-      );
-    } else if (controller.error != null) {
-      await showDialog<void>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Erreur de paiement'),
-          content: Text(controller.error!),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
         ),
       );
     }
@@ -272,6 +259,11 @@ class _PaymentCreateScreenState extends State<PaymentCreateScreen> {
                       ),
                     ],
                   ),
+                ),
+              if (controller.error != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: ErrorBanner(message: controller.error!),
                 ),
 
               // CARD

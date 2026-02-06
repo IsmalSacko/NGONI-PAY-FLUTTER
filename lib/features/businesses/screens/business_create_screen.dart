@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
 import 'package:ngoni_pay/common/utils/widgets/back_button.dart';
+import 'package:ngoni_pay/common/utils/widgets/error_banner.dart';
 import 'package:ngoni_pay/features/businesses/controllers/business_controller.dart';
 
 class BusinessCreateScreen extends StatefulWidget {
@@ -23,6 +24,7 @@ class _BusinessCreateScreenState extends State<BusinessCreateScreen> {
   final phoneController = TextEditingController();
 
   String _selectedType = 'shop';
+  String? _formError;
 
   @override
   void dispose() {
@@ -33,10 +35,11 @@ class _BusinessCreateScreenState extends State<BusinessCreateScreen> {
   }
 
   Future<void> _submit(BusinessController controller) async {
+    setState(() => _formError = null);
     if (nameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Le nom du business est obligatoire')),
-      );
+      setState(() {
+        _formError = 'Le nom du business est obligatoire';
+      });
       return;
     }
 
@@ -52,14 +55,15 @@ class _BusinessCreateScreenState extends State<BusinessCreateScreen> {
     if (!mounted) return;
 
     if (success) {
+      setState(() => _formError = null);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Entreprise créée avec succès')),
       );
       context.go('/welcome');
     } else if (controller.error != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(controller.error!)));
+      setState(() {
+        _formError = controller.error;
+      });
     }
   }
 
@@ -126,6 +130,11 @@ class _BusinessCreateScreenState extends State<BusinessCreateScreen> {
                             ),
                             child: Column(
                               children: [
+                                if (_formError != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: ErrorBanner(message: _formError!),
+                                  ),
                                 // NAME
                                 TextField(
                                   controller: nameController,

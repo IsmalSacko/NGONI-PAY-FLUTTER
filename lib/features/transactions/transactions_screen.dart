@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
+import 'package:ngoni_pay/common/utils/widgets/error_banner.dart';
 import 'package:ngoni_pay/core/enums/payment_status.dart';
 import 'package:ngoni_pay/features/payment/controller/payment_list_controller.dart';
 import 'package:provider/provider.dart';
@@ -69,7 +70,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
             // ❌ ERREUR
             if (controller.error != null) {
-              return Center(child: Text(controller.error!));
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: ErrorBanner(message: controller.error!),
+                ),
+              );
             }
 
             // 📭 EMPTY STATE

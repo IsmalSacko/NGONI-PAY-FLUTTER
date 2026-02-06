@@ -23,7 +23,10 @@ class AuthController extends ChangeNotifier {
           "Erreur lors de la connexion";
       return false;
     } catch (e) {
-      error = "Erreur lors de la connexion";
+      final message = e.toString();
+      error = message.startsWith('Exception: ')
+          ? message.replaceFirst('Exception: ', '')
+          : "Erreur lors de la connexion";
       return false;
     } finally {
       isLoading = false;
@@ -58,7 +61,10 @@ class AuthController extends ChangeNotifier {
           "Erreur lors de l’inscription";
       return false;
     } catch (e) {
-      error = "Erreur lors de l’inscription";
+      final message = e.toString();
+      error = message.startsWith('Exception: ')
+          ? message.replaceFirst('Exception: ', '')
+          : "Erreur lors de l’inscription";
       return false;
     } finally {
       isLoading = false;
@@ -99,6 +105,20 @@ class AuthController extends ChangeNotifier {
     DioException e, {
     required String fallback,
   }) {
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout) {
+      return "Connexion lente. Vérifiez votre internet puis réessayez.";
+    }
+    if (e.type == DioExceptionType.connectionError) {
+      return "Impossible de joindre le serveur. Vérifiez votre connexion.";
+    }
+    if (e.type == DioExceptionType.badCertificate) {
+      return "Connexion non sécurisée. Certificat invalide.";
+    }
+    if (e.type == DioExceptionType.cancel) {
+      return "Requête annulée.";
+    }
     final extracted = _extractErrorMessage(e.response?.data);
     if (extracted != null) return extracted;
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:ngoni_pay/common/utils/payment_method_label.dart';
+import 'package:ngoni_pay/common/utils/widgets/error_banner.dart';
 import 'package:ngoni_pay/features/invoice/controller/invoice_controller.dart';
 import 'package:ngoni_pay/features/invoice/pdf/invoice_pdf_template.dart';
 import 'package:provider/provider.dart';
@@ -57,7 +58,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(controller.error!),
+                ErrorBanner(message: controller.error!),
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: () {

@@ -103,7 +103,7 @@ class AppText {
   static const String kPaymentFailedMessage =
       'Le paiement a échoué. Veuillez réessayer.';
 
-   static const String kLocalPaymentHint =
+  static const String kLocalPaymentHint =
       'Paiements locaux disponibles au Mali : Orange Money, Moov Money.';
   static const String kMaliPhoneHelper =
       'Numéro mobile Mali (ex: +223 76 00 00 00)';

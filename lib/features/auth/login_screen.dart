@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
+import 'package:ngoni_pay/common/utils/widgets/error_banner.dart';
 import 'package:ngoni_pay/common/utils/widgets/reusable_text.dart';
 import 'package:ngoni_pay/features/auth/auth_controller.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +19,12 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -28,7 +35,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     final auth = context.watch<AuthController>();
 
     if (auth.isLoading) {
@@ -44,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 24),
               Text(
                 'Connexion en cours...',
-                style: appStyle(16, Kolors.kBlue, FontWeight.w500),
+                style: appStyle(16, Kolors.kPrimary, FontWeight.w500),
               ),
             ],
           ),
@@ -73,135 +79,120 @@ class _LoginScreenState extends State<LoginScreen> {
         backgroundColor: Kolors.kPrimary,
         elevation: 0,
       ),
-
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: SizedBox(
-            height: size.height - MediaQuery.of(context).padding.top,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isLandscape = constraints.maxWidth > constraints.maxHeight;
+
+            final header = Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // LOGO / TITLE
-                Column(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: const Image(
-                        image: AssetImage('assets/images/logo.png'),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    const SizedBox(height: 6),
-                    const Text(
-                      AppText.kLoginSubtitle,
-                      style: TextStyle(fontSize: 14, color: Kolors.kGray),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 32),
-
-                // CARD
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Kolors.kWhite,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Kolors.kGrayLight.withValues(alpha: 0.4),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      // PHONE
-                      TextField(
-                        controller: _phoneController,
-                        keyboardType: TextInputType.phone,
-                        decoration: InputDecoration(
-                          labelText: AppText.kTelephone,
-                          prefixIcon: const Icon(Icons.phone_outlined),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // PASSWORD
-                      TextField(
-                        controller: _passwordController,
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          labelText: AppText.kPassword,
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-                      // ERROR
-                      if (auth.error != null)
-                        ReusableText(
-                          text: auth.error!,
-                          style: const TextStyle(
-                            color: Kolors.kRed,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      const SizedBox(height: 16),
-                      // BUTTON
-                      SizedBox(
-                        width: double.infinity,
-                        height: 48,
-                        child: ElevatedButton(
-                          onPressed: auth.isLoading
-                              ? null
-                              : () async {
-                                  final success = await auth.login(
-                                    _phoneController.text,
-                                    _passwordController.text,
-                                  );
-
-                                  if (!mounted) return;
-                                  if (success) {
-                                    context.go('/business/picker');
-                                  }
-                                },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Kolors.kPrimary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: ReusableText(
-                            text: AppText.kLoginButton,
-                            style: appStyle(
-                              16,
-                              Kolors.kOffWhite,
-                              FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    fit: BoxFit.cover,
+                    width: isLandscape ? 120 : 160,
+                    height: isLandscape ? 120 : 160,
                   ),
                 ),
+                const SizedBox(height: 12),
+                const Text(
+                  AppText.kLoginSubtitle,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, color: Kolors.kGray),
+                ),
+              ],
+            );
 
-                const SizedBox(height: 24),
+            final form = Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Kolors.kWhite,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Kolors.kGrayLight.withValues(alpha: 0.4),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    decoration: InputDecoration(
+                      labelText: AppText.kTelephone,
+                      prefixIcon: const Icon(Icons.phone_outlined),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    decoration: InputDecoration(
+                      labelText: AppText.kPassword,
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() => _obscurePassword = !_obscurePassword);
+                        },
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                        ),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (auth.error != null) ErrorBanner(message: auth.error!),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: auth.isLoading
+                          ? null
+                          : () async {
+                              final success = await auth.login(
+                                _phoneController.text,
+                                _passwordController.text,
+                              );
 
-                // FOOTER
+                              if (!mounted) return;
+                              if (success) {
+                                // Navigation gérée par GoRouter via refreshListenable.
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Kolors.kPrimary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: ReusableText(
+                        text: AppText.kLoginButton,
+                        style: appStyle(16, Kolors.kOffWhite, FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+
+            final footer = Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
                 TextButton(
                   onPressed: () {},
                   child: Text(
@@ -212,9 +203,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                // REGISTER LINK
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 6,
                   children: [
                     const Text("Vous n'avez pas de compte ? "),
                     GestureDetector(
@@ -233,8 +224,44 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
               ],
-            ),
-          ),
+            );
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: isLandscape
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: header),
+                          const SizedBox(width: 24),
+                          Expanded(
+                            flex: 2,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                form,
+                                const SizedBox(height: 16),
+                                footer,
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          header,
+                          const SizedBox(height: 32),
+                          form,
+                          const SizedBox(height: 24),
+                          footer,
+                        ],
+                      ),
+              ),
+            );
+          },
         ),
       ),
     );

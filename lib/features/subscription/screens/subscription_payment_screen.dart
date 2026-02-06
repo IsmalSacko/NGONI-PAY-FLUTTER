@@ -3,6 +3,7 @@ import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/features/subscription/controllers/subscription_controller.dart';
 import 'package:ngoni_pay/features/subscription/screens/subscription_success_screen.dart';
 import 'package:ngoni_pay/common/utils/payment_method_label.dart';
+import 'package:ngoni_pay/common/utils/widgets/error_banner.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
@@ -23,6 +24,7 @@ class SubscriptionPaymentScreen extends StatefulWidget {
 
 class _SubscriptionPaymentScreenState extends State<SubscriptionPaymentScreen> {
   String _method = 'orange_money';
+  String? _uiError;
 
   @override
   Widget build(BuildContext context) {
@@ -164,6 +166,11 @@ class _SubscriptionPaymentScreenState extends State<SubscriptionPaymentScreen> {
               ),
               const SizedBox(height: 20),
             ],
+            if (_uiError != null || controller.error != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: ErrorBanner(message: _uiError ?? controller.error!),
+              ),
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -178,6 +185,7 @@ class _SubscriptionPaymentScreenState extends State<SubscriptionPaymentScreen> {
                 onPressed: controller.isLoading
                     ? null
                     : () async {
+                        setState(() => _uiError = null);
                         final result = await controller.createSubscription(
                           businessId: widget.businessId,
                           plan: widget.plan,
@@ -187,22 +195,10 @@ class _SubscriptionPaymentScreenState extends State<SubscriptionPaymentScreen> {
                         if (!context.mounted) return;
 
                         if (result == null) {
-                          final message =
-                              controller.error ?? 'Une erreur est survenue';
-                          await showDialog<void>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Erreur'),
-                              content: Text(message),
-                              actions: [
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.of(context).pop(),
-                                  child: const Text('OK'),
-                                ),
-                              ],
-                            ),
-                          );
+                          setState(() {
+                            _uiError =
+                                controller.error ?? 'Une erreur est survenue';
+                          });
                           return;
                         }
 
@@ -230,23 +226,10 @@ class _SubscriptionPaymentScreenState extends State<SubscriptionPaymentScreen> {
                           );
                           return;
                         }
-
-                        await showDialog<void>(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Erreur'),
-                            content: const Text(
-                              'Impossible de lancer le paiement abonnement.',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () =>
-                                    Navigator.of(context).pop(),
-                                child: const Text('OK'),
-                              ),
-                            ],
-                          ),
-                        );
+                        setState(() {
+                          _uiError =
+                              'Impossible de lancer le paiement abonnement.';
+                        });
                       },
                 child: controller.isLoading
                     ? const SizedBox(

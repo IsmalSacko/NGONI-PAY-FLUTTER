@@ -1,16 +1,22 @@
-# ngoni_pay
+# NGONI PAY (Flutter)
 
-A new Flutter project.
+![Flutter CI](https://github.com/IsmalSacko/NGONI-PAY-FLUTTER/actions/workflows/flutter.yml/badge.svg)
+![Release](https://github.com/IsmalSacko/NGONI-PAY-FLUTTER/actions/workflows/release.yml/badge.svg)
 
-## Getting Started
+Application mobile de gestion de paiements et d’abonnements.
 
-This project is a starting point for a Flutter application.
+## Documentation
+- `docs/APP_DOCUMENTATION.md`
+- `docs/ENVIRONMENTS.md`
+- `docs/QA_TEMPLATE.md`
+## Changelog
+- `CHANGELOG.md`
 
-A few resources to get you started if this is your first Flutter project:
+## Release Notes
+- `docs/RELEASE_NOTES.md`
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Quick Start
+```bash
+flutter pub get
+flutter run
+```
