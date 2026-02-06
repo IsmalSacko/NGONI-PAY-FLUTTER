@@ -1,10 +1,9 @@
 import java.util.Properties
+import java.io.File
 import java.io.FileInputStream
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
-    id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -14,16 +13,19 @@ val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
-val keyAlias = keystoreProperties.getProperty("keyAlias")
-val keyPassword = keystoreProperties.getProperty("keyPassword")
-val storeFilePath = keystoreProperties.getProperty("storeFile")
-val storePassword = keystoreProperties.getProperty("storePassword")
+val keystoreKeyAlias = keystoreProperties.getProperty("keyAlias")
+val keystoreKeyPassword = keystoreProperties.getProperty("keyPassword")
+val keystoreStoreFilePath = keystoreProperties.getProperty("storeFile")
+val keystoreStorePassword = keystoreProperties.getProperty("storePassword")
+val keystoreStoreFile: File? = keystoreStoreFilePath?.let { path ->
+    val file = File(path)
+    if (file.isAbsolute) file else rootProject.file("app/$path")
+}
 val isSigningConfigured = listOf(
-    keyAlias,
-    keyPassword,
-    storeFilePath,
-    storePassword
-).all { !it.isNullOrBlank() }
+    keystoreKeyAlias,
+    keystoreKeyPassword,
+    keystoreStorePassword
+).all { !it.isNullOrBlank() } && keystoreStoreFile?.exists() == true
 
 android {
     namespace = "com.ismaeldev.ngonipay"
@@ -51,10 +53,11 @@ android {
     signingConfigs {
         if (isSigningConfigured) {
             create("release") {
-                keyAlias = keyAlias
-                keyPassword = keyPassword
-                storeFile = file(storeFilePath!!)
-                storePassword = storePassword
+                keyAlias = keystoreKeyAlias
+                keyPassword = keystoreKeyPassword
+                storeFile = keystoreStoreFile
+                storePassword = keystoreStorePassword
+                storeType = "JKS"
             }
         }
     }
@@ -65,12 +68,6 @@ android {
                 signingConfig = signingConfigs.getByName("release")
             }
         }
-    }
-}
-
-kotlin {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 

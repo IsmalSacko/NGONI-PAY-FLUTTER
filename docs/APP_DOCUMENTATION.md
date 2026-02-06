@@ -181,6 +181,18 @@ flutter build apk --release
 flutter build appbundle --release
 ```
 
+### GitHub Actions (signature Android)
+Secrets à ajouter dans GitHub :
+- `ANDROID_KEYSTORE_BASE64`
+- `ANDROID_STORE_PASSWORD`
+- `ANDROID_KEY_PASSWORD`
+- `ANDROID_KEY_ALIAS`
+
+Créer la valeur base64 (PowerShell) :
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("android/app/upload-keystore.jks"))
+```
+
 ### iOS (Release)
 1. Installer pods :
 ```bash
