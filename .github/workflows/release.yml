@@ -15,11 +15,36 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "stable"
+          channel: "stable"
           cache: true
 
       - name: Install deps
         run: flutter pub get
+
+      - name: Validate keystore secrets
+        run: |
+          if [ -z "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "Missing ANDROID_KEYSTORE_BASE64 secret"; exit 1;
+          fi
+          if [ -z "${{ secrets.ANDROID_STORE_PASSWORD }}" ]; then
+            echo "Missing ANDROID_STORE_PASSWORD secret"; exit 1;
+          fi
+          if [ -z "${{ secrets.ANDROID_KEY_PASSWORD }}" ]; then
+            echo "Missing ANDROID_KEY_PASSWORD secret"; exit 1;
+          fi
+          if [ -z "${{ secrets.ANDROID_KEY_ALIAS }}" ]; then
+            echo "Missing ANDROID_KEY_ALIAS secret"; exit 1;
+          fi
+
+      - name: Setup Android keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+          cat > android/key.properties <<EOF
+          storePassword=${{ secrets.ANDROID_STORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          storeFile=upload-keystore.jks
+          EOF
 
       - name: Build APK
         run: flutter build apk --release
