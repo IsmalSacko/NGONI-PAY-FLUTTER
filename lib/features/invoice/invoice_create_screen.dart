@@ -295,7 +295,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                           Statut : ${payment.status}
                           ''');
                         },
-                        icon: const Icon(Icons.share, color: Colors.white),
+                        
                         label: const Text(
                           'Partager autrement',
                           style: TextStyle(color: Colors.white),

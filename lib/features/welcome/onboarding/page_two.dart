@@ -16,7 +16,7 @@ class PageTwo extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: [
             Kolors.kWhite.withValues(alpha: 0.0),
-            Kolors.kPrimary.withValues(alpha: 0.0),
+            Kolors.kOffWhite.withValues(alpha: 0.0),
           ],
         ),
       ),
@@ -32,7 +32,7 @@ class PageTwo extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12.0),
               child: Image.asset(
-                "assets/images/screen_2des.png",
+                "assets/images/paydevice.png",
                 fit: BoxFit.contain,
               ),
             ),
