@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:ngoni_pay/common/utils/app_style.dart';
 import 'package:ngoni_pay/common/utils/kcolors.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
@@ -72,8 +73,7 @@ class _FreeDashboardScreenState extends State<FreeDashboardScreen>
           context.read<SubscriptionController>().subscription;
       if (subscription != null &&
           subscription.plan == 'free' &&
-          subscription.endsAt != null &&
-          subscription.endsAt!.isAfter(DateTime.now())) {
+          subscription.isTrialActive) {
         context.go('/dashboard');
         return;
       }
@@ -158,6 +158,7 @@ class _FreeDashboardScreenState extends State<FreeDashboardScreen>
     }
 
     final paymentsController = context.watch<PaymentListController>();
+    final subscription = context.watch<SubscriptionController>().subscription;
 
     return Scaffold(
       appBar: AppBar(
@@ -215,6 +216,17 @@ class _FreeDashboardScreenState extends State<FreeDashboardScreen>
                               FontWeight.w500,
                             ),
                           ),
+                          if (subscription != null) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              'Temps restant : ${_formatRemaining(subscription.trialEndsAt)}',
+                              style: appStyle(
+                                12,
+                                Kolors.kSecondaryLight,
+                                FontWeight.w600,
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(
@@ -287,6 +299,22 @@ class _FreeDashboardScreenState extends State<FreeDashboardScreen>
     );
   }
 
+  String _formatRemaining(DateTime? trialEnd) {
+    if (trialEnd == null) return 'indisponible';
+    final now = DateTime.now();
+    if (!trialEnd.isAfter(now)) return 'expiré';
+    final diff = trialEnd.difference(now);
+    final totalMinutes = diff.inMinutes;
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+    if (hours >= 24) {
+      final days = hours ~/ 24;
+      final remHours = hours % 24;
+      return '${days}j ${remHours}h';
+    }
+    return '${hours}h ${minutes}m';
+  }
+
   Widget _buildRecentPayments(PaymentListController controller) {
     if (controller.isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -352,26 +380,38 @@ class _FreeDashboardScreenState extends State<FreeDashboardScreen>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      paymentMethodLabel(payment.method),
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      isSuccess ? 'Payé' : 'En attente',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isSuccess ? Kolors.kSuccess : Kolors.kGold,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        paymentMethodLabel(payment.method),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Text(
+                        isSuccess ? 'Payé' : 'En attente',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isSuccess ? Kolors.kSuccess : Kolors.kGold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
-                Text(
-                  amount,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    amount,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    textAlign: TextAlign.right,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),

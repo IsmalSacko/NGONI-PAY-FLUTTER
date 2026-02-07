@@ -22,4 +22,14 @@ class SubscriptionModel {
       isActive: json['is_active'],
     );
   }
+
+  DateTime? get trialEndsAt {
+    if (plan != 'free') return endsAt;
+    return endsAt ?? startsAt.add(const Duration(hours: 24));
+  }
+
+  bool get isTrialActive {
+    final trial = trialEndsAt;
+    return trial != null && trial.isAfter(DateTime.now());
+  }
 }

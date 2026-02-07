@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:ngoni_pay/features/businesses/controllers/business_controller.dart';
 import 'package:ngoni_pay/features/businesses/controllers/stats_controller.dart';
@@ -9,11 +10,15 @@ import 'package:ngoni_pay/features/user/profile_controller.dart';
 import 'package:provider/provider.dart';
 
 import 'package:ngoni_pay/app/app_router.dart';
+import 'package:ngoni_pay/core/config/api_config.dart';
 import 'package:ngoni_pay/common/utils/kstrings.dart';
 import 'package:ngoni_pay/features/auth/auth_controller.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  if (kReleaseMode && ApiConfig.isDefaultBaseUrl) {
+    throw StateError('API_BASE_URL is not set for release builds.');
+  }
   runApp(const NgoniPayApp());
 }
 

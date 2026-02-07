@@ -13,18 +13,27 @@ class ApiService {
     ),
   );
 
+  static Future<Options> _options({required bool auth}) async {
+    if (!auth) {
+      return Options(headers: {'Accept': 'application/json'});
+    }
+    final token = await SecureStorage.getToken();
+    return Options(
+      headers: {
+        'Accept': 'application/json',
+        if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+      },
+    );
+  }
+
   // Requête POST
   static Future<Response> post(
     String endpoint, {
     Map<String, dynamic>? data,
     bool auth = false,
   }) async {
-    if (auth) {
-      final token = await SecureStorage.getToken();
-      _dio.options.headers['Authorization'] = 'Bearer $token';
-    }
-
-    return _dio.post(endpoint, data: data);
+    final options = await _options(auth: auth);
+    return _dio.post(endpoint, data: data, options: options);
   }
 
   // Requête GET
@@ -33,11 +42,8 @@ class ApiService {
     bool auth = false,
     Map<String, dynamic>? queryParameters,
   }) async {
-    if (auth) {
-      final token = await SecureStorage.getToken();
-      _dio.options.headers['Authorization'] = 'Bearer $token';
-    }
-    return _dio.get(endpoint, queryParameters: queryParameters);
+    final options = await _options(auth: auth);
+    return _dio.get(endpoint, queryParameters: queryParameters, options: options);
   }
 
   // Requête PATCH
@@ -46,12 +52,8 @@ class ApiService {
     Map<String, dynamic>? data,
     bool auth = false,
   }) async {
-    if (auth) {
-      final token = await SecureStorage.getToken();
-      _dio.options.headers['Authorization'] = 'Bearer $token';
-    }
-
-    return _dio.patch(endpoint, data: data);
+    final options = await _options(auth: auth);
+    return _dio.patch(endpoint, data: data, options: options);
   }
 
   // Requête PATCH multipart (FormData)
@@ -60,12 +62,8 @@ class ApiService {
     required FormData data,
     bool auth = false,
   }) async {
-    if (auth) {
-      final token = await SecureStorage.getToken();
-      _dio.options.headers['Authorization'] = 'Bearer $token';
-    }
-
-    return _dio.patch(endpoint, data: data);
+    final options = await _options(auth: auth);
+    return _dio.patch(endpoint, data: data, options: options);
   }
 
   // Requête POST multipart (FormData)
@@ -74,20 +72,13 @@ class ApiService {
     required FormData data,
     bool auth = false,
   }) async {
-    if (auth) {
-      final token = await SecureStorage.getToken();
-      _dio.options.headers['Authorization'] = 'Bearer $token';
-    }
-
-    return _dio.post(endpoint, data: data);
+    final options = await _options(auth: auth);
+    return _dio.post(endpoint, data: data, options: options);
   }
 
   // Requête DELETE
   static Future<Response> delete(String endpoint, {bool auth = false}) async {
-    if (auth) {
-      final token = await SecureStorage.getToken();
-      _dio.options.headers['Authorization'] = 'Bearer $token';
-    }
-    return _dio.delete(endpoint);
+    final options = await _options(auth: auth);
+    return _dio.delete(endpoint, options: options);
   }
 }

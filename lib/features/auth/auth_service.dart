@@ -72,6 +72,7 @@ class AuthService {
 
   Future<void> logout() async {
     await SecureStorage.clearToken();
+    await _resetBusinessCache();
     notifyAuthChanged();
   }
 }

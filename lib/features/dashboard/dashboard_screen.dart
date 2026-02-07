@@ -78,14 +78,9 @@ class _DashboardScreenState extends State<DashboardScreen>
       context.go('/subscription/$businessId');
       return;
     }
-    if (subscription.plan == 'free') {
-      final trialEndsAt = subscription.endsAt;
-      final trialActive = trialEndsAt != null &&
-          trialEndsAt.isAfter(DateTime.now());
-      if (!trialActive) {
-        context.go('/dashboard/free');
-        return;
-      }
+    if (subscription.plan == 'free' && !subscription.isTrialActive) {
+      context.go('/dashboard/free');
+      return;
     }
 
     await context.read<PaymentListController>().loadPayments(
@@ -123,6 +118,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   Widget build(BuildContext context) {
     final controller = context.watch<PaymentListController>();
     final statsController = context.watch<StatsController>();
+    final subscription = context.watch<SubscriptionController>().subscription;
 
     if (_businessId == null) {
       return Scaffold(
@@ -219,6 +215,25 @@ class _DashboardScreenState extends State<DashboardScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeader(),
+              if (subscription != null && subscription.plan == 'free') ...[
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Kolors.kSecondaryLight.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Kolors.kSecondaryLight),
+                  ),
+                  child: Text(
+                    'Essai Pro restant : ${_formatRemaining(subscription.trialEndsAt)}',
+                    style: appStyle(12, Kolors.kPrimary, FontWeight.w700),
+                  ),
+                ),
+              ],
               const SizedBox(height: 24),
               _buildSummary(statsController),
               const SizedBox(height: 12),
@@ -468,5 +483,21 @@ class _DashboardScreenState extends State<DashboardScreen>
         ),
       ],
     );
+  }
+
+  String _formatRemaining(DateTime? trialEnd) {
+    if (trialEnd == null) return 'indisponible';
+    final now = DateTime.now();
+    if (!trialEnd.isAfter(now)) return 'expiré';
+    final diff = trialEnd.difference(now);
+    final totalMinutes = diff.inMinutes;
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+    if (hours >= 24) {
+      final days = hours ~/ 24;
+      final remHours = hours % 24;
+      return '${days}j ${remHours}h';
+    }
+    return '${hours}h ${minutes}m';
   }
 }

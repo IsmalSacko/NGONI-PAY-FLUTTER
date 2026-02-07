@@ -20,14 +20,18 @@ class UserModel {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final rawId = json['id'];
+    final id = rawId is int ? rawId : int.tryParse(rawId?.toString() ?? '') ?? 0;
+    final createdAt = DateTime.tryParse(json['created_at']?.toString() ?? '');
+
     return UserModel(
-      id: json['id'],
+      id: id,
       name: json['name'] ?? '',
       phone: json['phone'] ?? '',
       email: json['email'],
       role: json['role'] ?? '',
       avatarUrl: _normalizeAvatarUrl(json['avatar_url']),
-      createdAt: DateTime.parse(json['created_at']),
+      createdAt: createdAt ?? DateTime.fromMillisecondsSinceEpoch(0),
     );
   }
 
